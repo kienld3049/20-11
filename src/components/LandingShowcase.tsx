@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, KeyRound, Lock, ShieldCheck, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, Lock, Sparkles } from 'lucide-react';
 import { SAMPLE_DEMO_CARD } from '../types/card';
 import { CardViewer } from './CardViewer';
 import { PetalCanvas } from './PetalCanvas';
@@ -9,7 +9,6 @@ interface LandingShowcaseProps {
   isAuthenticated: boolean;
   isSigningIn: boolean;
   authError: string | null;
-  onGoogleSignIn: () => Promise<boolean>;
   onPasscodeSignIn: (passcode: string) => Promise<boolean>;
   onEnterStudio: () => void;
 }
@@ -18,7 +17,6 @@ export const LandingShowcase: React.FC<LandingShowcaseProps> = ({
   isAuthenticated,
   isSigningIn,
   authError,
-  onGoogleSignIn,
   onPasscodeSignIn,
   onEnterStudio,
 }) => {
@@ -136,28 +134,6 @@ export const LandingShowcase: React.FC<LandingShowcaseProps> = ({
                 <span>{isSigningIn ? 'Đang xác thực...' : 'Xác thực & Vào Trang Chỉnh Sửa'}</span>
               </button>
             </form>
-
-            <div className="relative my-5 text-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#F59E0B]/35" />
-              </div>
-              <span className="relative bg-[#FFFDF8] px-3 text-[11px] uppercase tracking-wider text-[#0F4C5C]/60">
-                Hoặc
-              </span>
-            </div>
-
-            <button
-              type="button"
-              disabled={isSigningIn}
-              onClick={async () => {
-                setLocalError(null);
-                await onGoogleSignIn();
-              }}
-              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white hover:bg-[#FEF3C7]/60 border border-[#F59E0B]/55 text-[#0F4C5C] text-xs font-medium transition-colors disabled:opacity-60 cursor-pointer"
-            >
-              <ShieldCheck className="w-4 h-4 text-[#AA7C32]" />
-              <span>Đăng nhập bằng Google (Firebase)</span>
-            </button>
           </>
         )}
 

@@ -1337,7 +1337,7 @@ export const AdminStudio: React.FC<AdminStudioProps> = ({
                         />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-script text-xl text-[#D97706]">
+                        <p className="font-display italic font-semibold text-[15px] tracking-[0.04em] text-[#B45309] mb-0.5">
                           {previewCard.honorific}
                         </p>
                         <h3 className="font-serif font-semibold text-2xl text-[#0F4C5C] leading-tight truncate">
@@ -1356,7 +1356,9 @@ export const AdminStudio: React.FC<AdminStudioProps> = ({
                         {previewCard.message}
                       </p>
                       <div className="mt-4 pt-3 border-t border-[#F59E0B]/25 text-right">
-                        <p className="font-script text-lg text-[#D97706]">Kính tặng,</p>
+                        <p className="font-display italic font-semibold text-[15px] tracking-[0.04em] text-[#B45309] mb-0.5">
+                          Kính tặng,
+                        </p>
                         <p className="font-serif font-semibold text-base text-[#0F4C5C]">
                           {previewCard.senderName}
                         </p>
@@ -1567,8 +1569,8 @@ export const AdminStudio: React.FC<AdminStudioProps> = ({
                 </h2>
               </div>
               <p className="text-sm text-[#2D2926]/80 leading-relaxed">
-                Bạn có thể chạy máy chủ Node.js (`npm run build && npm start`) để dùng đồng thời
-                đăng nhập mật khẩu Admin và Firebase Firestore:
+                Bạn có thể chạy máy chủ Node.js (`npm run build && npm start`) để vận hành trang
+                chỉnh sửa với xác thực mật khẩu Admin:
               </p>
 
               <ol className="space-y-4 text-sm text-[#2D2926]/85">
@@ -1578,7 +1580,7 @@ export const AdminStudio: React.FC<AdminStudioProps> = ({
                   </p>
                   <p className="text-xs text-[#2D2926]/70 leading-relaxed">
                     Đặt <code className="font-mono bg-[#EAE3D5] px-1.5 py-0.5">ADMIN_PASSCODE</code>{' '}
-                    (mặc định <span className="font-mono">20-11-2016</span>) trên máy chủ của bạn.
+                    (mặc định <span className="font-mono">20-11-2026</span>) trên máy chủ của bạn.
                   </p>
                 </li>
                 <li className="border border-[#C59B57]/30 p-4 bg-white/70">
@@ -1603,23 +1605,22 @@ export const AdminStudio: React.FC<AdminStudioProps> = ({
               </ol>
             </section>
 
-            {/* Collaborator Admin Management */}
+            {/* Admin Security Info */}
             <section className="lg:col-span-6 bg-[#FAF7F0] border border-[#C59B57]/40 p-6 sm:p-8 space-y-6 shadow-sm">
               <div className="flex items-center gap-2.5 text-[#7A8B74]">
                 <ShieldCheck className="w-5 h-5" />
                 <h2 className="font-display text-2xl font-bold text-[#2D2926]">
-                  Phân quyền &amp; Bảo mật Admin
+                  Bảo mật Trang Chỉnh Sửa
                 </h2>
               </div>
 
               <div className="p-4 bg-white/70 border border-[#C59B57]/30 text-xs text-[#2D2926]/80 space-y-1">
                 <p>
-                  <strong>Chế độ hiện tại:</strong>{' '}
-                  {isPasscodeMode ? 'Đăng nhập bằng Mật khẩu Admin' : `Google (${firebaseUser?.email})`}
+                  <strong>Chế độ hiện tại:</strong> Xác thực bằng Mật khẩu Admin
                 </p>
                 <p className="text-[#2D2926]/65">
-                  Quản trị viên chính Firebase ({SUPER_ADMIN_EMAIL}) có thể cấp thêm cộng tác viên
-                  Google tại đây.
+                  Chỉ người có mật khẩu mới vào được Studio chỉnh sửa, tạo và quản lý danh sách
+                  thiệp.
                 </p>
               </div>
 

@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { ArrowLeft, FileWarning } from 'lucide-react';
 import { PasscodeAdminSession, TeacherCard } from './types/card';
-import {
-  OperationType,
-  auth,
-  db,
-  googleProvider,
-  handleFirestoreError,
-} from './lib/firebase';
+import { OperationType, db, handleFirestoreError } from './lib/firebase';
 import { isValidSlug } from './lib/cardUtils';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { CardViewer } from './components/CardViewer';
@@ -50,13 +43,8 @@ function AppContent() {
   const [loadingPublicCard, setLoadingPublicCard] = useState<boolean>(Boolean(cardSlug));
   const [publicCardNotFound, setPublicCardNotFound] = useState<boolean>(false);
 
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [passcodeSession, setPasscodeSession] = useState<PasscodeAdminSession | null>(() =>
     loadStoredPasscodeSession()
-  );
-  const [authReady, setAuthReady] = useState(false);
-  const [viewMode, setViewMode] = useState<'landing' | 'studio'>(() =>
-    loadStoredPasscodeSession() ? 'studio' : 'landing'
   );
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -81,7 +69,6 @@ function AppContent() {
         if (!res.ok) {
           window.sessionStorage.removeItem(PASSCODE_STORAGE_KEY);
           setPasscodeSession(null);
-          setViewMode('landing');
         }
       })
       .catch(() => {
@@ -89,19 +76,7 @@ function AppContent() {
       });
   }, []);
 
-  // Firebase Auth listener
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setFirebaseUser(currentUser);
-      setAuthReady(true);
-      if (currentUser && !cardSlug) {
-        setViewMode('studio');
-      }
-    });
-    return () => unsub();
-  }, [cardSlug]);
-
-  // Fetch public card when ?card=<slug> is present (supports both Express /api/cards & Firestore)
+  // Fetch public card when ?card=<slug> is present (supports Express /api/cards & Firestore fallback)
   useEffect(() => {
     if (!cardSlug) {
       setPublicCard(null);
@@ -123,7 +98,7 @@ function AppContent() {
 
     const fetchCard = async () => {
       try {
-        // 1. Check server card store first (for passcode-admin created cards)
+        // 1. Check server card store first
         const apiRes = await fetch(`/api/cards/${encodeURIComponent(cardSlug)}`).catch(
           () => null
         );
@@ -137,7 +112,7 @@ function AppContent() {
           }
         }
 
-        // 2. Fall back to Cloud Firestore (for Google-admin created cards)
+        // 2. Fall back to Cloud Firestore if previously saved there
         const snap = await getDoc(doc(db, 'cards', cardSlug));
         if (!active) return;
         if (snap.exists()) {
@@ -168,35 +143,6 @@ function AppContent() {
     window.history.pushState({}, '', url.toString());
     document.title = 'Thiệp Tri Ân 20/11 — Botanical & Handmade Paper';
     setCardSlug(null);
-    setViewMode('landing');
-  };
-
-  const handleGoogleSignIn = async (): Promise<boolean> => {
-    setAuthError(null);
-    setIsSigningIn(true);
-    try {
-      await signInWithPopup(auth, googleProvider);
-      setViewMode('studio');
-      return true;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('popup-closed-by-user')) {
-        setAuthError('Bạn đã đóng cửa sổ đăng nhập Google trước khi hoàn tất.');
-      } else if (msg.includes('unauthorized-domain')) {
-        setAuthError(
-          'Tên miền hiện tại chưa được cấp quyền Google Sign-In trong Firebase. Bạn hãy đăng nhập bằng Mật khẩu Admin ở trên.'
-        );
-      } else if (msg.includes('popup-blocked')) {
-        setAuthError(
-          'Trình duyệt đã chặn cửa sổ đăng nhập Google. Vui lòng cho phép pop-up hoặc dùng Mật khẩu Admin.'
-        );
-      } else {
-        setAuthError('Không thể đăng nhập Google. Vui lòng thử lại hoặc dùng Mật khẩu Admin.');
-      }
-      return false;
-    } finally {
-      setIsSigningIn(false);
-    }
   };
 
   const handlePasscodeSignIn = async (passcode: string): Promise<boolean> => {
@@ -231,7 +177,6 @@ function AppContent() {
       };
       window.sessionStorage.setItem(PASSCODE_STORAGE_KEY, JSON.stringify(session));
       setPasscodeSession(session);
-      setViewMode('studio');
       return true;
     } catch {
       setAuthError('Không thể kết nối máy chủ xác thực.');
@@ -241,13 +186,9 @@ function AppContent() {
     }
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     window.sessionStorage.removeItem(PASSCODE_STORAGE_KEY);
     setPasscodeSession(null);
-    if (firebaseUser) {
-      await signOut(auth);
-    }
-    setViewMode('landing');
   };
 
   // 1. Public Recipient Card View (?card=<slug>)
@@ -291,41 +232,30 @@ function AppContent() {
     return <CardViewer card={publicCard} onNavigateHome={handleNavigateHome} />;
   }
 
-  // 2. Wait for Firebase Auth readiness if no passcode session yet
-  if (!authReady && !passcodeSession) {
-    return (
-      <div className="min-h-screen linen-sunlight-bg text-[#2D2926] flex items-center justify-center">
-        <div className="w-9 h-9 border-2 border-[#C59B57] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  // 3. Authenticated Admin Studio (Passcode or Google)
-  if (passcodeSession || firebaseUser) {
+  // 2. Authenticated Admin Studio (Password only)
+  if (passcodeSession) {
     return (
       <AdminStudio
-        firebaseUser={firebaseUser}
+        firebaseUser={null}
         passcodeSession={passcodeSession}
         onPasscodeExpired={() => {
           window.sessionStorage.removeItem(PASSCODE_STORAGE_KEY);
           setPasscodeSession(null);
-          setViewMode('landing');
         }}
-        onSignOut={() => void handleSignOut()}
-        onNavigateHome={() => setViewMode('studio')}
+        onSignOut={handleSignOut}
+        onNavigateHome={() => undefined}
       />
     );
   }
 
-  // 4. Direct Passcode Authentication Gate
+  // 3. Direct Password Authentication Gate
   return (
     <LandingShowcase
-      isAuthenticated={Boolean(viewMode === 'studio' && (passcodeSession || firebaseUser))}
+      isAuthenticated={false}
       isSigningIn={isSigningIn}
       authError={authError}
-      onGoogleSignIn={handleGoogleSignIn}
       onPasscodeSignIn={handlePasscodeSignIn}
-      onEnterStudio={() => setViewMode('studio')}
+      onEnterStudio={() => undefined}
     />
   );
 }

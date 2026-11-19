@@ -165,10 +165,17 @@ export const CardViewer: React.FC<CardViewerProps> = ({
 
   const effectiveCard = card;
 
+  const handleEnvelopeBreakStart = () => {
+    if (activeMusicTheme !== 'none' && !teacherMusic.getIsPlaying()) {
+      teacherMusic.start(activeMusicTheme, card.customAudioUrl);
+      setIsMusicPlaying(true);
+    }
+  };
+
   const handleEnvelopeOpened = () => {
     setEnvelopeOpen(true);
     requestAnimationFrame(() => setCardEntered(true));
-    if (activeMusicTheme !== 'none' && !isMusicPlaying) {
+    if (activeMusicTheme !== 'none' && !teacherMusic.getIsPlaying()) {
       teacherMusic.start(activeMusicTheme, card.customAudioUrl);
       setIsMusicPlaying(true);
     }
@@ -179,7 +186,7 @@ export const CardViewer: React.FC<CardViewerProps> = ({
       setIsFlipped(true);
       setBurstKey((k) => k + 1);
     }
-    if (activeMusicTheme !== 'none' && !isMusicPlaying) {
+    if (activeMusicTheme !== 'none' && !teacherMusic.getIsPlaying()) {
       teacherMusic.start(activeMusicTheme, card.customAudioUrl);
       setIsMusicPlaying(true);
     }
@@ -492,7 +499,7 @@ export const CardViewer: React.FC<CardViewerProps> = ({
                     <p className="font-serif uppercase text-[11px] tracking-[0.24em] text-[#059669] font-semibold mb-1.5">
                       {card.yearLabel} · Tri Ân Thầy Cô
                     </p>
-                    <p className="font-script text-[30px] sm:text-[36px] text-[#D97706] leading-tight">
+                    <p className="font-display italic font-semibold text-[18px] sm:text-[21px] tracking-[0.04em] text-[#B45309] leading-snug mb-0.5">
                       {effectiveCard.honorific}
                     </p>
                     <h2 className="font-display font-semibold text-2xl sm:text-[30px] tracking-tight text-[#0F4C5C] mt-0.5 text-balance">
@@ -534,7 +541,7 @@ export const CardViewer: React.FC<CardViewerProps> = ({
                 style={{ transitionDelay: `${540 + paragraphs.length * 140}ms` }}
               >
                 <div className="text-right">
-                  <p className="font-script text-[26px] sm:text-[30px] text-[#D97706] leading-none mb-1">
+                  <p className="font-display italic font-semibold text-[16px] sm:text-[18px] tracking-[0.04em] text-[#B45309] leading-snug mb-1">
                     Kính tặng,
                   </p>
                   <p className="font-display italic font-semibold text-base sm:text-lg text-[#0F4C5C]">
@@ -570,6 +577,7 @@ export const CardViewer: React.FC<CardViewerProps> = ({
       {!envelopeOpen && (
         <EnvelopeReveal
           card={effectiveCard}
+          onBreakStart={handleEnvelopeBreakStart}
           onOpen={handleEnvelopeOpened}
         />
       )}

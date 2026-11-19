@@ -883,6 +883,7 @@ class TeacherMusicPlayer {
   private wetGain: GainNode | null = null;
   private timerId: number | null = null;
   private customAudio: HTMLAudioElement | null = null;
+  private silentUnlockAudio: HTMLAudioElement | null = null;
   private isPlaying = false;
   private measureIndex = 0;
   private buffers = new Map<string, AudioBuffer>();
@@ -907,7 +908,37 @@ class TeacherMusicPlayer {
     return impulse;
   }
 
+  private enablePlaybackAudioSession(): void {
+    try {
+      const nav = navigator as unknown as { audioSession?: { type: string } };
+      if (nav.audioSession && 'type' in nav.audioSession) {
+        nav.audioSession.type = 'playback';
+      }
+    } catch {
+      // Ignore unsupported audioSession API
+    }
+  }
+
+  private startSilentSwitchBypass(): void {
+    try {
+      if (!this.silentUnlockAudio) {
+        const silentWavDataUri =
+          'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+        const el = new Audio(silentWavDataUri);
+        el.loop = true;
+        el.setAttribute('playsinline', 'true');
+        el.setAttribute('webkit-playsinline', 'true');
+        this.silentUnlockAudio = el;
+      }
+      void this.silentUnlockAudio.play().catch(() => undefined);
+    } catch {
+      // Ignore mobile unlock helper errors
+    }
+  }
+
   private ensureContext(): AudioContext {
+    this.enablePlaybackAudioSession();
+
     if (!this.ctx) {
       const AudioCtx =
         window.AudioContext ||
@@ -947,7 +978,36 @@ class TeacherMusicPlayer {
     if (this.ctx.state === 'suspended') {
       void this.ctx.resume();
     }
+
+    // Play a 1-sample silent buffer synchronously inside gesture to unlock iOS Safari Web Audio
+    try {
+      const silentBuf = this.ctx.createBuffer(1, 1, 22050);
+      const src = this.ctx.createBufferSource();
+      src.buffer = silentBuf;
+      src.connect(this.ctx.destination);
+      src.start(0);
+    } catch {
+      // Ignore
+    }
+
     return this.ctx;
+  }
+
+  private decodeAudioBuffer(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBuffer | null> {
+    return new Promise((resolve) => {
+      try {
+        const result = ctx.decodeAudioData(
+          data,
+          (decoded) => resolve(decoded),
+          () => resolve(null)
+        );
+        if (result && typeof result.then === 'function') {
+          result.then(resolve).catch(() => resolve(null));
+        }
+      } catch {
+        resolve(null);
+      }
+    });
   }
 
   private async loadSampleUrl(url: string): Promise<ArrayBuffer | null> {
@@ -966,7 +1026,7 @@ class TeacherMusicPlayer {
     const existing = this.loadingPromises.get(kind);
     if (existing) return existing;
 
-    const ctx = this.ensureContext();
+    const ctx = this.ctx || this.ensureContext();
     const bank = SAMPLE_BANK[kind];
 
     const promise = Promise.all(
@@ -978,11 +1038,9 @@ class TeacherMusicPlayer {
           data = await this.loadSampleUrl(`${bank.cdn}/${entry.name}.mp3`);
         }
         if (!data) return;
-        try {
-          const decoded = await ctx.decodeAudioData(data);
+        const decoded = await this.decodeAudioBuffer(ctx, data);
+        if (decoded) {
           this.buffers.set(key, decoded);
-        } catch {
-          // Ignore individual decode errors
         }
       })
     ).then(() => undefined);
@@ -1056,6 +1114,9 @@ class TeacherMusicPlayer {
 
     const scheduleNextMeasure = () => {
       if (!this.isPlaying || !this.ctx) return;
+      if (this.ctx.state === 'suspended') {
+        void this.ctx.resume();
+      }
 
       const measure = score.measures[this.measureIndex % score.measures.length];
       const baseTime = this.ctx.currentTime + 0.06;
@@ -1098,24 +1159,30 @@ class TeacherMusicPlayer {
   }
 
   private playRealAudioFile(src: string, fallbackSrc?: string): void {
+    this.enablePlaybackAudioSession();
     const audio = new Audio(src);
     audio.loop = true;
-    audio.volume = 0.62;
+    audio.volume = 0.65;
+    audio.preload = 'auto';
+    audio.setAttribute('playsinline', 'true');
+    audio.setAttribute('webkit-playsinline', 'true');
     this.customAudio = audio;
 
     let fellBack = false;
     const triggerFallback = () => {
       if (fellBack || !this.isPlaying || !fallbackSrc) return;
       fellBack = true;
-      const fb = new Audio(fallbackSrc);
-      fb.loop = true;
-      fb.volume = 0.62;
-      this.customAudio = fb;
-      void fb.play().catch(() => undefined);
+      audio.src = fallbackSrc;
+      audio.load();
+      void audio.play().catch(() => undefined);
     };
 
     audio.addEventListener('error', triggerFallback, { once: true });
     void audio.play().catch(triggerFallback);
+  }
+
+  public getIsPlaying(): boolean {
+    return this.isPlaying;
   }
 
   public start(theme: MusicTheme, customAudioUrl?: string): void {
@@ -1139,6 +1206,8 @@ class TeacherMusicPlayer {
     }
 
     this.ensureContext();
+    this.startSilentSwitchBypass();
+
     const safeTheme: Exclude<MusicTheme, 'custom' | 'none' | 'canon-in-d'> =
       theme === 'nguoi-thay' ||
       theme === 'mong-uoc-ky-niem-xua' ||
@@ -1146,12 +1215,14 @@ class TeacherMusicPlayer {
         ? theme
         : 'bui-phan';
 
-    void Promise.all([
-      this.ensureInstrumentSamples('piano'),
-      this.ensureInstrumentSamples('strings'),
-      this.ensureInstrumentSamples('flute'),
-      this.ensureInstrumentSamples('celesta'),
-    ]).then(() => {
+    // Load strings/flute/celesta in parallel, and begin playback as soon as piano is decoded
+    void this.ensureInstrumentSamples('strings');
+    void this.ensureInstrumentSamples('flute');
+    if (safeTheme === 'mong-uoc-ky-niem-xua' || safeTheme === 'nho-on-thay-co') {
+      void this.ensureInstrumentSamples('celesta');
+    }
+
+    void this.ensureInstrumentSamples('piano').then(() => {
       if (this.isPlaying) {
         this.scheduleScoreLoop(safeTheme);
       }
@@ -1168,6 +1239,9 @@ class TeacherMusicPlayer {
       this.customAudio.pause();
       this.customAudio.src = '';
       this.customAudio = null;
+    }
+    if (this.silentUnlockAudio) {
+      this.silentUnlockAudio.pause();
     }
   }
 }

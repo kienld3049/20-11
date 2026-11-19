@@ -5,17 +5,20 @@ import { ViewportCornerBotanicals } from './BotanicalIllustrations';
 
 interface EnvelopeRevealProps {
   card: Pick<TeacherCard, 'honorific' | 'teacherName' | 'roleOrSubject' | 'senderName'>;
+  onBreakStart?: () => void;
   onOpen: () => void;
 }
 
 export const EnvelopeReveal: React.FC<EnvelopeRevealProps> = ({
   card,
+  onBreakStart,
   onOpen,
 }) => {
   const [stage, setStage] = useState<'idle' | 'opening' | 'done'>('idle');
 
   const handleBreakSeal = () => {
     if (stage !== 'idle') return;
+    onBreakStart?.();
     setStage('opening');
     window.setTimeout(() => {
       setStage('done');

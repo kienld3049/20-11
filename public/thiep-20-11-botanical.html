@@ -723,6 +723,7 @@
       let wetNode = null;
       let musicTimer = null;
       let realAudioEl = null;
+      let silentUnlockAudio = null;
       let musicPlaying = false;
       let measureIdx = 0;
       let trackIdx = 0;
@@ -873,7 +874,31 @@
         },
       ];
 
+      function enablePlaybackAudioSession() {
+        try {
+          if (navigator.audioSession && 'type' in navigator.audioSession) {
+            navigator.audioSession.type = 'playback';
+          }
+        } catch {}
+      }
+
+      function startSilentSwitchBypass() {
+        try {
+          if (!silentUnlockAudio) {
+            const silentWavDataUri =
+              'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+            const el = new Audio(silentWavDataUri);
+            el.loop = true;
+            el.setAttribute('playsinline', 'true');
+            el.setAttribute('webkit-playsinline', 'true');
+            silentUnlockAudio = el;
+          }
+          silentUnlockAudio.play().catch(() => {});
+        } catch {}
+      }
+
       function ensureAudioGraph() {
+        enablePlaybackAudioSession();
         const Ctx = window.AudioContext || window.webkitAudioContext;
         if (!Ctx) return null;
         if (!audioCtx) {
@@ -908,8 +933,32 @@
           master.connect(audioCtx.destination);
           wetNode = conv;
         }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        try {
+          const silentBuf = audioCtx.createBuffer(1, 1, 22050);
+          const src = audioCtx.createBufferSource();
+          src.buffer = silentBuf;
+          src.connect(audioCtx.destination);
+          src.start(0);
+        } catch {}
         return audioCtx;
+      }
+
+      function decodeAudioBuffer(ctx, ab) {
+        return new Promise((resolve) => {
+          try {
+            const res = ctx.decodeAudioData(
+              ab,
+              (decoded) => resolve(decoded),
+              () => resolve(null)
+            );
+            if (res && typeof res.then === 'function') {
+              res.then(resolve).catch(() => resolve(null));
+            }
+          } catch {
+            resolve(null);
+          }
+        });
       }
 
       async function fetchSampleArrayBuffer(url) {
@@ -926,7 +975,7 @@
 
       async function ensureInstrumentSamples(kind) {
         if (sampleLoadPromises.has(kind)) return sampleLoadPromises.get(kind);
-        const ctx = ensureAudioGraph();
+        const ctx = audioCtx || ensureAudioGraph();
         if (!ctx) return;
         const bank = SAMPLE_BANK[kind];
         const p = Promise.all(
@@ -936,10 +985,8 @@
             let ab = await fetchSampleArrayBuffer(`${bank.folder}/${entry.name}.mp3`);
             if (!ab) ab = await fetchSampleArrayBuffer(`${bank.cdn}/${entry.name}.mp3`);
             if (!ab) return;
-            try {
-              const decoded = await ctx.decodeAudioData(ab);
-              sampleBuffers.set(key, decoded);
-            } catch {}
+            const decoded = await decodeAudioBuffer(ctx, ab);
+            if (decoded) sampleBuffers.set(key, decoded);
           })
         );
         sampleLoadPromises.set(kind, p);
@@ -987,6 +1034,7 @@
 
       function scheduleNextBar() {
         if (!musicPlaying || !audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
         const track = TRACKS[trackIdx];
         if (!track.measures) return;
         const secPerBeat = 60 / track.bpm;
@@ -1016,19 +1064,21 @@
         updateAudioUI(true);
 
         if (track.audioUrl) {
+          enablePlaybackAudioSession();
           const audio = new Audio(track.audioUrl);
           audio.loop = true;
           audio.volume = 0.62;
+          audio.preload = 'auto';
+          audio.setAttribute('playsinline', 'true');
+          audio.setAttribute('webkit-playsinline', 'true');
           realAudioEl = audio;
           let fellBack = false;
           const triggerFb = () => {
             if (fellBack || !musicPlaying || !track.fallbackUrl) return;
             fellBack = true;
-            const fb = new Audio(track.fallbackUrl);
-            fb.loop = true;
-            fb.volume = 0.62;
-            realAudioEl = fb;
-            fb.play().catch(() => {});
+            audio.src = track.fallbackUrl;
+            audio.load();
+            audio.play().catch(() => {});
           };
           audio.addEventListener('error', triggerFb, { once: true });
           audio.play().catch(triggerFb);
@@ -1037,12 +1087,11 @@
 
         try {
           if (!ensureAudioGraph()) return;
-          Promise.all([
-            ensureInstrumentSamples('piano'),
-            ensureInstrumentSamples('strings'),
-            ensureInstrumentSamples('flute'),
-            ensureInstrumentSamples('celesta'),
-          ]).then(() => {
+          startSilentSwitchBypass();
+          ensureInstrumentSamples('strings');
+          ensureInstrumentSamples('flute');
+          ensureInstrumentSamples('celesta');
+          ensureInstrumentSamples('piano').then(() => {
             if (musicPlaying) scheduleNextBar();
           });
         } catch {}
@@ -1058,6 +1107,9 @@
           realAudioEl.pause();
           realAudioEl.src = '';
           realAudioEl = null;
+        }
+        if (silentUnlockAudio) {
+          silentUnlockAudio.pause();
         }
         updateAudioUI(false);
       }
