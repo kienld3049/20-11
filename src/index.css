@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-script: "Great Vibes", "Dancing Script", cursive;
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.font-script,
+.font-display,
+.font-serif {
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #fef3c7;
+    color: #0f4c5c;
+    overflow-x: hidden;
+  }
+}
+
+/* Warm Morning Sunlit Gradient (#FEF3C7 -> #FDE68A) + Dappled Window Sunlight */
+.linen-sunlight-bg {
+  background-color: #fef3c7;
+  background-image:
+    radial-gradient(ellipse 68% 58% at 14% 12%, rgba(255, 255, 255, 0.72) 0%, rgba(255, 251, 235, 0.25) 55%, transparent 80%),
+    radial-gradient(ellipse 60% 52% at 88% 85%, rgba(245, 158, 11, 0.16) 0%, transparent 72%),
+    linear-gradient(
+      124deg,
+      rgba(255, 255, 255, 0.44) 0%,
+      rgba(255, 255, 255, 0.04) 24%,
+      rgba(255, 253, 240, 0.48) 42%,
+      rgba(255, 255, 255, 0.02) 58%,
+      rgba(255, 253, 240, 0.32) 76%,
+      transparent 100%
+    ),
+    linear-gradient(150deg, #fef3c7 0%, #fde68a 100%);
+}
+
+/* Crisp White Handmade Cotton Paper (#FFFFFF) with Deep Soft Shadow */
+.cotton-card-shell {
+  position: relative;
+  background: transparent;
+}
+
+.cotton-paper-surface {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(at 18% 12%, rgba(254, 243, 199, 0.22) 0%, transparent 52%),
+    radial-gradient(at 88% 88%, rgba(16, 185, 129, 0.04) 0%, transparent 50%);
+  box-shadow:
+    0 34px 72px -14px rgba(15, 76, 92, 0.24),
+    0 18px 36px -10px rgba(146, 64, 14, 0.16),
+    inset 0 0 0 1px rgba(245, 158, 11, 0.24);
+}
+
+.cotton-deckle-layer {
+  background-color: #ffffff;
+  filter: url(#deckle-edge-filter);
+  box-shadow:
+    0 38px 80px -16px rgba(15, 76, 92, 0.26),
+    0 16px 32px -10px rgba(146, 64, 14, 0.18);
+}
+
+/* Gold Foil Text Gradient (#D4AF37 -> #AA7C32) with periodic 4s shimmer */
+.gold-foil-2011 {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(
+    115deg,
+    #b68938 0%,
+    #d4af37 22%,
+    #f6e5a3 36%,
+    #c59b57 52%,
+    #aa7c32 76%,
+    #d4af37 100%
+  );
+  background-size: 220% 100%;
+  background-position: 100% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(170, 124, 50, 0.2));
+  animation: foilShimmer 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes foilShimmer {
+  0%,
+  55% {
+    background-position: 100% 50%;
+  }
+  85%,
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 3D Card Flip Mechanics */
+.perspective-1600 {
+  perspective: 1600px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Staggered smooth fade-up for inner card face (0.8s) */
+.inner-reveal-item {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.card-is-flipped .inner-reveal-item {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Mini 4-bar Audio Wave */
+@keyframes eqWave {
+  0%,
+  100% {
+    transform: scaleY(0.32);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.audio-bar {
+  width: 2.5px;
+  height: 13px;
+  border-radius: 999px;
+  transform-origin: bottom center;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.audio-bar-playing {
+  animation: eqWave 0.9s ease-in-out infinite;
+}
+
+/* Wax Seal Subtle Glow */
+@keyframes sealBreath {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 12px 26px -6px rgba(120, 84, 28, 0.48),
+      inset 0 2px 4px rgba(255, 240, 190, 0.55),
+      inset 0 -3px 6px rgba(90, 60, 18, 0.45);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow:
+      0 16px 32px -6px rgba(170, 124, 50, 0.62),
+      inset 0 2px 6px rgba(255, 246, 210, 0.72),
+      inset 0 -3px 6px rgba(90, 60, 18, 0.45);
+  }
+}
+
+.wax-seal-btn {
+  animation: sealBreath 2.8s ease-in-out infinite;
+}
+
+@keyframes sparklePulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.sparkle-twinkle {
+  animation: sparklePulse 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == 'kienld.neonstudio@gmail.com';
+    }
+
+    function isAdmin() {
+      return isSuperAdmin() || (
+        isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidAdminMember(data) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'addedBy', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'displayName', 'addedBy', 'createdAt']) &&
+        isValidId(data.uid) &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 254 &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120 &&
+        isValidId(data.addedBy) &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidTeacherCard(data) {
+      return data.keys().hasAll([
+          'honorific', 'teacherName', 'roleOrSubject', 'photoData',
+          'message', 'senderName', 'yearLabel', 'musicTheme',
+          'customAudioUrl', 'lacquerStyle', 'ownerUid', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'honorific', 'teacherName', 'roleOrSubject', 'photoData',
+          'message', 'senderName', 'yearLabel', 'musicTheme',
+          'customAudioUrl', 'lacquerStyle', 'ownerUid', 'createdAt', 'updatedAt'
+        ]) &&
+        data.honorific is string && data.honorific.size() >= 1 && data.honorific.size() <= 40 &&
+        data.teacherName is string && data.teacherName.size() >= 1 && data.teacherName.size() <= 120 &&
+        data.roleOrSubject is string && data.roleOrSubject.size() <= 140 &&
+        data.photoData is string && data.photoData.size() <= 600000 &&
+        data.message is string && data.message.size() >= 1 && data.message.size() <= 2500 &&
+        data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 150 &&
+        data.yearLabel is string && data.yearLabel.size() >= 1 && data.yearLabel.size() <= 40 &&
+        data.musicTheme in ['bui-phan', 'nguoi-thay', 'mong-uoc-ky-niem-xua', 'nho-on-thay-co', 'canon-in-d', 'custom', 'none'] &&
+        data.customAudioUrl is string && data.customAudioUrl.size() <= 500 &&
+        data.lacquerStyle in ['royal-crimson', 'imperial-gold', 'lotus-burgundy'] &&
+        isValidId(data.ownerUid) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && (isSuperAdmin() || (isSignedIn() && adminId == request.auth.uid));
+      allow list: if isSuperAdmin();
+      allow create: if isValidId(adminId) &&
+        isSuperAdmin() &&
+        isValidAdminMember(incoming()) &&
+        incoming().uid == adminId &&
+        incoming().addedBy == request.auth.uid &&
+        incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isValidId(adminId) && isSuperAdmin();
+    }
+
+    match /cards/{cardId} {
+      // Public recipients open individual cards via exact shareable link ID without signing in
+      allow get: if isValidId(cardId);
+
+      // Listing cards is restricted: superadmin sees all; collaborator admins query their own cards
+      allow list: if isSignedIn() && (isSuperAdmin() || existing().ownerUid == request.auth.uid);
+
+      allow create: if isValidId(cardId) &&
+        isSignedIn() &&
+        isValidTeacherCard(incoming()) &&
+        incoming().ownerUid == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+
+      allow update: if isValidId(cardId) &&
+        isSignedIn() &&
+        isValidTeacherCard(incoming()) &&
+        incoming().ownerUid == existing().ownerUid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'honorific', 'teacherName', 'roleOrSubject', 'photoData',
+          'message', 'senderName', 'yearLabel', 'musicTheme',
+          'customAudioUrl', 'lacquerStyle', 'updatedAt'
+        ]) &&
+        (isSuperAdmin() || (existing().ownerUid == request.auth.uid && isAdmin()));
+
+      allow delete: if isValidId(cardId) &&
+        isSignedIn() &&
+        (isSuperAdmin() || (existing().ownerUid == request.auth.uid && isAdmin()));
+    }
+  }
+}

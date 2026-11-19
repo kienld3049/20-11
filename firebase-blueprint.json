@@ -1,0 +1,155 @@
+{
+  "entities": {
+    "AdminMember": {
+      "title": "AdminMember",
+      "description": "Authorized administrator granted access to create and manage Teachers' Day 20/11 greeting cards.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the collaborator admin.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified email address of the collaborator admin.",
+          "minLength": 3,
+          "maxLength": 254
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the collaborator admin.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "addedBy": {
+          "type": "string",
+          "description": "UID of the superadmin who added this collaborator.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when admin access was granted."
+        }
+      },
+      "required": ["uid", "email", "displayName", "addedBy", "createdAt"]
+    },
+    "TeacherCard": {
+      "title": "TeacherCard",
+      "description": "Personalized Vietnamese Teachers' Day (20/11) ceremonial lacquer greeting card.",
+      "type": "object",
+      "properties": {
+        "honorific": {
+          "type": "string",
+          "description": "Ceremonial greeting prefix such as 'Kính tặng Cô' or 'Kính tặng Thầy'.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "teacherName": {
+          "type": "string",
+          "description": "Full name of the honored teacher.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "roleOrSubject": {
+          "type": "string",
+          "description": "Subject taught, class, or academic title.",
+          "minLength": 0,
+          "maxLength": 140
+        },
+        "photoData": {
+          "type": "string",
+          "description": "Compressed image data URI or HTTPS URL of the teacher's portrait.",
+          "minLength": 0,
+          "maxLength": 600000
+        },
+        "message": {
+          "type": "string",
+          "description": "Heartfelt tribute letter written for the teacher.",
+          "minLength": 1,
+          "maxLength": 2500
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Name of the class, student group, or sender.",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "yearLabel": {
+          "type": "string",
+          "description": "Commemorative date label displayed on the card.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "musicTheme": {
+          "type": "string",
+          "description": "Selected commemorative melody played when opening the card.",
+          "enum": ["bui-phan", "nguoi-thay", "mong-uoc-ky-niem-xua", "nho-on-thay-co", "canon-in-d", "custom", "none"]
+        },
+        "customAudioUrl": {
+          "type": "string",
+          "description": "Optional external HTTPS audio URL when musicTheme is 'custom'.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "lacquerStyle": {
+          "type": "string",
+          "description": "Lacquerware visual palette variant for the card.",
+          "enum": ["royal-crimson", "imperial-gold", "lotus-burgundy"]
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "UID of the admin who created this card.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of card creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest update."
+        }
+      },
+      "required": [
+        "honorific",
+        "teacherName",
+        "roleOrSubject",
+        "photoData",
+        "message",
+        "senderName",
+        "yearLabel",
+        "musicTheme",
+        "customAudioUrl",
+        "lacquerStyle",
+        "ownerUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": {
+        "$ref": "#/entities/AdminMember"
+      },
+      "description": "Collaborator admin registry keyed by Firebase Auth UID."
+    },
+    "/cards/{cardId}": {
+      "schema": {
+        "$ref": "#/entities/TeacherCard"
+      },
+      "description": "Individual 20/11 greeting cards addressed by shareable slug ID."
+    }
+  }
+}

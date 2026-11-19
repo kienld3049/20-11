@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thiệp Chúc Mừng 20/11 — Botanical &amp; Handmade Paper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Dancing+Script:wght@500;600;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              sunlight: '#FEF3C7',
+              sunglow: '#FDE68A',
+              cotton: '#FFFFFF',
+              tealink: '#0F4C5C',
+              amberbloom: '#F59E0B',
+              coralbloom: '#FB7185',
+              emeraldleaf: '#10B981',
+              emeralddeep: '#059669',
+            },
+            fontFamily: {
+              cormorant: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+              playfair: ['"Playfair Display"', 'Georgia', 'serif'],
+              script: ['"Great Vibes"', '"Dancing Script"', 'cursive'],
+              vietnam: ['"Be Vietnam Pro"', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #fef3c7;
+        color: #0f4c5c;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        margin: 0;
+        overflow-x: hidden;
+      }
+
+      .font-script,
+      .font-playfair,
+      .font-cormorant {
+        font-feature-settings: "liga" 1, "kern" 1;
+      }
+
+      /* Warm Morning Sunlight Gradient & Dappled Window Light */
+      .sunlit-morning-bg {
+        background-color: #fef3c7;
+        background-image:
+          radial-gradient(ellipse 68% 58% at 88% 8%, rgba(255, 255, 255, 0.72) 0%, rgba(255, 251, 235, 0.25) 55%, transparent 80%),
+          linear-gradient(126deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 24%, rgba(255, 255, 255, 0.34) 40%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.26) 78%, rgba(255, 255, 255, 0) 100%),
+          linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+      }
+
+      /* Deckle edge & crisp white cotton paper with deep soft shadow */
+      .deckle-base {
+        background-color: #ffffff;
+        filter: url(#deckle-edge-filter);
+        box-shadow:
+          0 38px 80px -16px rgba(15, 76, 92, 0.26),
+          0 16px 32px -10px rgba(180, 120, 20, 0.16);
+      }
+
+      .cotton-surface {
+        background-color: #ffffff;
+        background-image:
+          radial-gradient(at 18% 12%, rgba(254, 243, 199, 0.35) 0%, transparent 55%),
+          radial-gradient(at 88% 88%, rgba(16, 185, 129, 0.05) 0%, transparent 55%);
+        box-shadow:
+          0 34px 72px -14px rgba(15, 76, 92, 0.24),
+          0 14px 28px -8px rgba(180, 118, 22, 0.14),
+          inset 0 0 0 1px rgba(245, 158, 11, 0.32);
+      }
+
+      /* Gold Foil with 4s diagonal shimmer */
+      .gold-foil-gradient {
+        display: inline-block;
+        background: linear-gradient(115deg, #b45309 0%, #f59e0b 24%, #fde68a 38%, #d97706 54%, #b45309 78%, #f59e0b 100%);
+        background-size: 220% 100%;
+        background-position: 100% 50%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: drop-shadow(0 1px 1px rgba(180, 83, 9, 0.2));
+        animation: foilShimmer 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+
+      @keyframes foilShimmer {
+        0%, 55% { background-position: 100% 50%; }
+        85%, 100% { background-position: 0% 50%; }
+      }
+
+      /* 3D Flip & Tilt Containers */
+      .perspective-box {
+        perspective: 1600px;
+      }
+
+      .preserve-3d {
+        transform-style: preserve-3d;
+      }
+
+      .flipper {
+        transform-style: preserve-3d;
+        transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .flipper.is-flipped {
+        transform: rotateY(180deg);
+      }
+
+      .card-face {
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: rotateY(0deg);
+      }
+
+      .card-face-back {
+        transform: rotateY(180deg);
+      }
+
+      .flipper.is-flipped #card-front {
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .flipper:not(.is-flipped) .card-face-back {
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .flipper.is-flipped .card-face-back {
+        pointer-events: auto;
+        z-index: 20;
+      }
+
+      /* Staggered fade-up (0.8s) */
+      .inner-reveal {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+        transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: opacity, transform;
+      }
+
+      .flipper.is-flipped .inner-reveal {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+
+      /* 4-Bar Audio Wave */
+      @keyframes eqWave {
+        0%, 100% { transform: scaleY(0.32); }
+        50% { transform: scaleY(1); }
+      }
+
+      .audio-bar {
+        width: 2.5px;
+        height: 12px;
+        border-radius: 999px;
+        transform-origin: bottom center;
+        transition: transform 0.25s ease;
+      }
+
+      .audio-bar.playing {
+        background-color: #f59e0b;
+        animation: eqWave 0.9s ease-in-out infinite;
+      }
+
+      /* Wax Seal Glow */
+      @keyframes sealBreath {
+        0%, 100% { transform: scale(1); box-shadow: 0 14px 28px -6px rgba(15, 76, 92, 0.32), inset 0 2px 4px rgba(254, 243, 199, 0.6); }
+        50% { transform: scale(1.035); box-shadow: 0 18px 34px -6px rgba(217, 119, 6, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.78); }
+      }
+
+      .wax-seal {
+        animation: sealBreath 2.8s ease-in-out infinite;
+      }
+
+      @keyframes sparkle {
+        0%, 100% { opacity: 0.45; transform: scale(0.85); }
+        50% { opacity: 1; transform: scale(1.18); }
+      }
+
+      .sparkle-dot {
+        animation: sparkle 3.2s ease-in-out infinite;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .flipper, .sparkle-dot, .gold-foil-gradient, .inner-reveal, .audio-bar, .wax-seal {
+          transition: none !important;
+          animation: none !important;
+        }
+        .inner-reveal { opacity: 1 !important; transform: none !important; }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen sunlit-morning-bg flex items-center justify-center p-4 sm:p-8 relative">
+    <!-- SVG Filters: Cotton Paper Noise & Deckle Edge -->
+    <svg width="0" height="0" class="hidden" aria-hidden="true">
+      <defs>
+        <filter id="cotton-paper-noise" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="3" stitchTiles="stitch" result="noise" />
+          <feColorMatrix type="saturate" values="0" in="noise" result="monoNoise" />
+          <feComponentTransfer in="monoNoise">
+            <feFuncA type="linear" slope="0.045" />
+          </feComponentTransfer>
+        </filter>
+        <filter id="deckle-edge-filter" x="-4%" y="-4%" width="108%" height="108%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.032" numOctaves="3" seed="11" result="edgeNoise" />
+          <feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale="4.5" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+
+    <!-- 4-Corner Soft Translucent Viewport Botanicals (Amber/Coral Blooms & Emerald Foliage) -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+      <!-- Top-Left -->
+      <svg viewBox="0 0 260 240" fill="none" class="absolute -top-3 -left-3 w-44 sm:w-64 h-auto opacity-45">
+        <path d="M8 10 C60 36 105 84 148 142" stroke="#10B981" stroke-opacity="0.65" stroke-width="1.4" stroke-linecap="round" />
+        <path d="M18 68 C68 62 122 44 176 16" stroke="#059669" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" />
+        <ellipse cx="64" cy="40" rx="14" ry="8" transform="rotate(24 64 40)" fill="#10B981" fill-opacity="0.34" />
+        <ellipse cx="102" cy="78" rx="15" ry="8.5" transform="rotate(-18 102 78)" fill="#10B981" fill-opacity="0.3" />
+        <ellipse cx="136" cy="44" rx="12" ry="7" transform="rotate(42 136 44)" fill="#059669" fill-opacity="0.28" />
+        <g transform="translate(52, 62)">
+          <g fill="#F59E0B" fill-opacity="0.42">
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(0)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(30)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(60)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(90)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(120)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(150)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(180)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(210)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(240)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(270)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(300)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(330)" />
+          </g>
+          <circle cx="0" cy="0" r="8" fill="#FB7185" fill-opacity="0.52" />
+        </g>
+      </svg>
+
+      <!-- Top-Right -->
+      <svg viewBox="0 0 260 240" fill="none" class="absolute -top-3 -right-3 w-44 sm:w-64 h-auto opacity-45 scale-x-[-1]">
+        <path d="M8 10 C60 36 105 84 148 142" stroke="#10B981" stroke-opacity="0.65" stroke-width="1.4" stroke-linecap="round" />
+        <path d="M18 68 C68 62 122 44 176 16" stroke="#059669" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" />
+        <ellipse cx="64" cy="40" rx="14" ry="8" transform="rotate(24 64 40)" fill="#10B981" fill-opacity="0.34" />
+        <ellipse cx="102" cy="78" rx="15" ry="8.5" transform="rotate(-18 102 78)" fill="#10B981" fill-opacity="0.3" />
+        <g transform="translate(56, 56)">
+          <g fill="#FB7185" fill-opacity="0.38">
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(0)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(30)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(60)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(90)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(120)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(150)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(180)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(210)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(240)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(270)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(300)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(330)" />
+          </g>
+          <circle cx="0" cy="0" r="7.5" fill="#F59E0B" fill-opacity="0.6" />
+        </g>
+      </svg>
+
+      <!-- Bottom-Left -->
+      <svg viewBox="0 0 260 240" fill="none" class="absolute -bottom-3 -left-3 w-48 sm:w-72 h-auto opacity-50 scale-y-[-1]">
+        <path d="M8 10 C60 36 105 84 148 142" stroke="#10B981" stroke-opacity="0.65" stroke-width="1.4" stroke-linecap="round" />
+        <path d="M18 68 C68 62 122 44 176 16" stroke="#059669" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" />
+        <ellipse cx="64" cy="40" rx="14" ry="8" transform="rotate(24 64 40)" fill="#10B981" fill-opacity="0.34" />
+        <ellipse cx="102" cy="78" rx="15" ry="8.5" transform="rotate(-18 102 78)" fill="#10B981" fill-opacity="0.3" />
+        <ellipse cx="136" cy="44" rx="12" ry="7" transform="rotate(42 136 44)" fill="#059669" fill-opacity="0.28" />
+        <g transform="translate(52, 62)">
+          <g fill="#F59E0B" fill-opacity="0.45">
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(0)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(30)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(60)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(90)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(120)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(150)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(180)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(210)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(240)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(270)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(300)" />
+            <ellipse cx="0" cy="-22" rx="5.5" ry="16" transform="rotate(330)" />
+          </g>
+          <circle cx="0" cy="0" r="8" fill="#FB7185" fill-opacity="0.52" />
+        </g>
+      </svg>
+
+      <!-- Bottom-Right -->
+      <svg viewBox="0 0 260 240" fill="none" class="absolute -bottom-3 -right-3 w-48 sm:w-72 h-auto opacity-50 scale-[-1]">
+        <path d="M8 10 C60 36 105 84 148 142" stroke="#10B981" stroke-opacity="0.65" stroke-width="1.4" stroke-linecap="round" />
+        <path d="M18 68 C68 62 122 44 176 16" stroke="#059669" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" />
+        <ellipse cx="64" cy="40" rx="14" ry="8" transform="rotate(24 64 40)" fill="#10B981" fill-opacity="0.34" />
+        <ellipse cx="102" cy="78" rx="15" ry="8.5" transform="rotate(-18 102 78)" fill="#10B981" fill-opacity="0.3" />
+        <g transform="translate(56, 56)">
+          <g fill="#FB7185" fill-opacity="0.4">
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(0)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(30)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(60)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(90)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(120)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(150)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(180)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(210)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(240)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(270)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(300)" />
+            <ellipse cx="0" cy="-20" rx="5" ry="15" transform="rotate(330)" />
+          </g>
+          <circle cx="0" cy="0" r="7.5" fill="#F59E0B" fill-opacity="0.6" />
+        </g>
+      </svg>
+    </div>
+
+    <!-- Slow Falling Gold Dust & Flip Petal Burst Canvas -->
+    <canvas id="gold-dust-canvas" class="fixed inset-0 pointer-events-none z-20" aria-hidden="true"></canvas>
+    <canvas id="burst-canvas" class="fixed inset-0 pointer-events-none z-[60]" aria-hidden="true"></canvas>
+
+    <!-- ==================== ENVELOPE & WAX SEAL REVEAL ==================== -->
+    <div id="envelope-overlay" class="fixed inset-0 z-50 sunlit-morning-bg flex flex-col items-center justify-center px-4 py-8 transition-opacity duration-500">
+      <div class="w-full max-w-[490px] flex flex-col items-center relative z-10">
+        <div class="relative w-full aspect-[1.38/1] min-h-[310px] sm:min-h-[348px] perspective-box">
+          <!-- Emerging Card Preview -->
+          <div id="envelope-inner-card" class="absolute inset-x-5 top-4 bottom-4 bg-white border border-[#D4AF37]/60 shadow-[0_18px_40px_-10px_rgba(15,76,92,0.22)] flex flex-col items-center justify-center px-6 text-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]">
+            <div class="absolute inset-2.5 border border-[#D4AF37]/30 pointer-events-none"></div>
+            <span class="font-cormorant uppercase text-[10px] tracking-[0.22em] text-emeralddeep font-semibold">Chúc mừng Ngày Nhà giáo Việt Nam</span>
+            <span class="font-playfair font-bold text-3xl sm:text-4xl text-tealink mt-1.5 tabular-nums">20<span class="text-tealink font-normal mx-0.5">/</span>11</span>
+            <span class="font-playfair italic font-semibold text-xl text-[#D97706] mt-1">Tri ân Thầy Cô</span>
+          </div>
+
+          <!-- Envelope Body -->
+          <div class="absolute inset-0 rounded-[4px] bg-[#FFFDF8] border border-[#D4AF37]/55 shadow-[0_38px_82px_-16px_rgba(15,76,92,0.28),0_14px_32px_-10px_rgba(180,120,20,0.18)] overflow-hidden" style="background-image: radial-gradient(at 22% 18%, rgba(255,255,255,0.92) 0%, rgba(254,243,199,0.28) 65%, transparent 100%);">
+            <div class="absolute inset-0 pointer-events-none opacity-55 mix-blend-multiply" style="filter: url(#cotton-paper-noise)" aria-hidden="true"></div>
+
+            <!-- Luxury Botanical Gold Liner + Curved European Pocket -->
+            <svg viewBox="0 0 440 320" preserveAspectRatio="none" class="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+              <defs>
+                <linearGradient id="html-env-liner" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#FFFBEB" />
+                  <stop offset="50%" stop-color="#FEF3C7" stop-opacity="0.65" />
+                  <stop offset="100%" stop-color="#ECFDF5" stop-opacity="0.55" />
+                </linearGradient>
+                <linearGradient id="html-env-pocket" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#FFFFFF" />
+                  <stop offset="100%" stop-color="#FFFDF7" />
+                </linearGradient>
+                <filter id="html-env-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="0" dy="-2" stdDeviation="3.5" flood-color="#0F4C5C" flood-opacity="0.1" />
+                </filter>
+              </defs>
+              <rect x="0" y="0" width="440" height="200" fill="url(#html-env-liner)" />
+              <g opacity="0.28" stroke="#C59B57" stroke-width="0.9" fill="none">
+                <path d="M40 30 Q90 70 120 120" />
+                <ellipse cx="70" cy="54" rx="7" ry="14" transform="rotate(-35 70 54)" />
+                <ellipse cx="95" cy="82" rx="6" ry="12" transform="rotate(-25 95 82)" />
+                <path d="M400 30 Q350 70 320 120" />
+                <ellipse cx="370" cy="54" rx="7" ry="14" transform="rotate(35 370 54)" />
+                <ellipse cx="345" cy="82" rx="6" ry="12" transform="rotate(25 345 82)" />
+              </g>
+              <polygon points="0,0 198,162 0,320" fill="#FFFDF8" stroke="#D4AF37" stroke-opacity="0.32" stroke-width="1" />
+              <polygon points="440,0 242,162 440,320" fill="#FFFDF8" stroke="#D4AF37" stroke-opacity="0.32" stroke-width="1" />
+              <path d="M0,320 L0,292 L182,154 Q220,126 258,154 L440,292 L440,320 Z" fill="url(#html-env-pocket)" stroke="#D4AF37" stroke-opacity="0.45" stroke-width="1.1" filter="url(#html-env-shadow)" />
+            </svg>
+
+            <!-- Botanical Floral Accents on Lower Envelope Corners -->
+            <svg viewBox="0 0 440 320" fill="none" class="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+              <g opacity="0.88">
+                <path d="M10 306 C38 282 54 252 62 214" stroke="#059669" stroke-width="1.25" stroke-linecap="round" />
+                <path d="M24 294 C54 286 82 288 106 298" stroke="#10B981" stroke-width="1.1" stroke-linecap="round" />
+                <ellipse cx="42" cy="242" rx="7" ry="12" transform="rotate(-24 42 242)" fill="#10B981" fill-opacity="0.32" stroke="#059669" stroke-width="0.75" />
+                <ellipse cx="26" cy="264" rx="6.5" ry="11" transform="rotate(-48 26 264)" fill="#34D399" fill-opacity="0.34" stroke="#059669" stroke-width="0.75" />
+                <ellipse cx="76" cy="288" rx="8" ry="5.5" transform="rotate(14 76 288)" fill="#10B981" fill-opacity="0.3" stroke="#059669" stroke-width="0.75" />
+                <g transform="translate(46, 286)">
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(0)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(45)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(90)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(135)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(180)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(225)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(270)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <ellipse cx="0" cy="-12" rx="3.4" ry="9.5" transform="rotate(315)" fill="#F59E0B" fill-opacity="0.46" stroke="#D97706" stroke-width="0.5" />
+                  <circle cx="0" cy="0" r="4.8" fill="#D97706" fill-opacity="0.85" />
+                  <circle cx="0" cy="0" r="2.2" fill="#FDE68A" />
+                </g>
+              </g>
+              <g opacity="0.85">
+                <path d="M430 306 C404 288 386 266 376 238" stroke="#059669" stroke-width="1.2" stroke-linecap="round" />
+                <ellipse cx="394" cy="266" rx="6.5" ry="11" transform="rotate(28 394 266)" fill="#10B981" fill-opacity="0.3" stroke="#059669" stroke-width="0.7" />
+                <ellipse cx="412" cy="284" rx="7" ry="10.5" transform="rotate(52 412 284)" fill="#34D399" fill-opacity="0.34" stroke="#059669" stroke-width="0.7" />
+                <g transform="translate(396, 290)">
+                  <ellipse cx="0" cy="-10" rx="3" ry="8" transform="rotate(0)" fill="#FB7185" fill-opacity="0.45" stroke="#E11D48" stroke-width="0.45" />
+                  <ellipse cx="0" cy="-10" rx="3" ry="8" transform="rotate(60)" fill="#FB7185" fill-opacity="0.45" stroke="#E11D48" stroke-width="0.45" />
+                  <ellipse cx="0" cy="-10" rx="3" ry="8" transform="rotate(120)" fill="#FB7185" fill-opacity="0.45" stroke="#E11D48" stroke-width="0.45" />
+                  <ellipse cx="0" cy="-10" rx="3" ry="8" transform="rotate(180)" fill="#FB7185" fill-opacity="0.45" stroke="#E11D48" stroke-width="0.45" />
+                  <ellipse cx="0" cy="-10" rx="3" ry="8" transform="rotate(240)" fill="#FB7185" fill-opacity="0.45" stroke="#E11D48" stroke-width="0.45" />
+                  <ellipse cx="0" cy="-10" rx="3" ry="8" transform="rotate(300)" fill="#FB7185" fill-opacity="0.45" stroke="#E11D48" stroke-width="0.45" />
+                  <circle cx="0" cy="0" r="4" fill="#F59E0B" fill-opacity="0.85" />
+                </g>
+              </g>
+            </svg>
+
+            <!-- Delicate Silk Ribbon -->
+            <div
+              id="envelope-ribbon"
+              class="absolute inset-x-0 top-[47%] -translate-y-1/2 h-5 border-y border-[#FDE68A]/85 shadow-[0_2px_10px_rgba(15,76,92,0.16)] transition-opacity duration-300"
+              style="background: linear-gradient(90deg, rgba(15,76,92,0.88) 0%, rgba(16,110,115,0.92) 32%, rgba(20,128,122,0.94) 50%, rgba(16,110,115,0.92) 68%, rgba(15,76,92,0.88) 100%);"
+              aria-hidden="true"
+            ></div>
+
+            <!-- Framed Vellum Nameplate -->
+            <div id="envelope-label" class="relative z-10 h-full flex flex-col justify-end items-center pb-5 sm:pb-6 px-8 transition-opacity duration-300">
+              <div class="bg-white/95 border border-[#D4AF37]/50 px-5 sm:px-7 py-2.5 shadow-[0_6px_18px_-6px_rgba(15,76,92,0.16)] text-center max-w-[82%] relative">
+                <span class="absolute inset-1 border border-[#D4AF37]/25 pointer-events-none"></span>
+                <p class="font-script text-[26px] sm:text-[30px] text-[#D97706] leading-none mb-1">Kính gửi</p>
+                <p id="envelope-recipient" class="font-playfair font-semibold text-lg sm:text-[22px] text-tealink tracking-[0.01em] leading-tight truncate">Cô Nguyễn Minh Anh</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Curved Top Flap -->
+          <div id="envelope-flap" class="absolute inset-x-0 top-0 h-[55%] origin-top transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] preserve-3d pointer-events-none z-20">
+            <svg viewBox="0 0 440 176" preserveAspectRatio="none" class="w-full h-full drop-shadow-[0_8px_16px_rgba(15,76,92,0.16)]" aria-hidden="true">
+              <defs>
+                <linearGradient id="html-env-flap" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#FFFFFF" />
+                  <stop offset="100%" stop-color="#FFFBEB" />
+                </linearGradient>
+              </defs>
+              <path d="M0,0 L440,0 L440,14 L256,154 Q220,180 184,154 L0,14 Z" fill="url(#html-env-flap)" stroke="#D4AF37" stroke-opacity="0.5" stroke-width="1.2" />
+              <path d="M14,8 L426,8 L250,144 Q220,166 190,144 Z" fill="none" stroke="#D4AF37" stroke-opacity="0.28" stroke-width="0.9" />
+            </svg>
+          </div>
+
+          <!-- Gold Wax Seal 20·11 -->
+          <button
+            id="btn-wax-seal"
+            type="button"
+            aria-label="Chạm vào dấu sáp 20·11 để mở phong bì"
+            class="wax-seal absolute left-1/2 top-[47%] -translate-x-1/2 -translate-y-1/2 z-30 w-[86px] h-[86px] rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 focus:outline-none"
+            style="background: radial-gradient(circle at 30% 28%, #FEF08A 0%, #F59E0B 34%, #C27803 70%, #78350F 100%); border: 2px solid rgba(255,255,255,0.78);"
+          >
+            <span class="w-[66px] h-[66px] rounded-full border border-[#FFFBEB]/70 flex flex-col items-center justify-center shadow-inner">
+              <span class="font-playfair font-bold text-[16px] tracking-wider text-white">20/11</span>
+              <span class="text-[8px] uppercase tracking-[0.2em] text-[#FFFBEB] font-semibold mt-0.5">Tri ân</span>
+            </span>
+          </button>
+        </div>
+
+        <div class="mt-7 flex flex-col items-center gap-3 text-center">
+          <button id="btn-break-seal-text" type="button" class="px-6 py-2.5 bg-tealink hover:bg-[#0B3B48] text-white text-xs font-medium tracking-[0.14em] uppercase shadow-[0_10px_24px_-6px_rgba(15,76,92,0.4)] border border-[#D4AF37]/40 transition-colors cursor-pointer">
+            Mở phong bì tri ân
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main 3D Card Stage -->
+    <main id="card-stage" class="relative z-10 w-full max-w-[540px] perspective-box opacity-0 translate-y-8 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]">
+      <div id="card-tilt" class="w-full preserve-3d will-change-transform">
+        <div id="card-flipper" class="relative w-full min-h-[680px] flipper">
+          <!-- ==================== MẶT TRƯỚC THIỆP ==================== -->
+          <section
+            id="card-front"
+            role="button"
+            tabindex="0"
+            aria-label="Chạm vào thiệp để mở lời chúc 20/11"
+            class="absolute inset-0 card-face cursor-pointer select-none focus:outline-none"
+          >
+            <div class="absolute inset-0 deckle-base rounded-sm pointer-events-none"></div>
+
+            <div class="relative h-full w-full cotton-surface rounded-sm overflow-hidden flex flex-col justify-between px-7 sm:px-11 pt-9 pb-8">
+              <div class="absolute inset-0 pointer-events-none opacity-45 mix-blend-multiply" style="filter: url(#cotton-paper-noise)" aria-hidden="true"></div>
+              <div class="absolute inset-4 sm:inset-5 border border-[#C59B57]/38 pointer-events-none" aria-hidden="true">
+                <div class="absolute inset-[5px] border border-[#D4AF37]/20"></div>
+                <span class="absolute -top-px -left-px w-4 h-4 border-t-2 border-l-2 border-[#D4AF37]/75"></span>
+                <span class="absolute -top-px -right-px w-4 h-4 border-t-2 border-r-2 border-[#D4AF37]/75"></span>
+                <span class="absolute -bottom-px -left-px w-4 h-4 border-b-2 border-l-2 border-[#D4AF37]/75"></span>
+                <span class="absolute -bottom-px -right-px w-4 h-4 border-b-2 border-r-2 border-[#D4AF37]/75"></span>
+              </div>
+              <svg viewBox="0 0 140 120" fill="none" aria-hidden="true" class="absolute top-0 right-0 w-28 sm:w-36 h-auto pointer-events-none z-0 opacity-55">
+                <path d="M138 14 C108 26 84 48 64 78" stroke="#059669" stroke-width="1.2" stroke-linecap="round" />
+                <ellipse cx="104" cy="24" rx="7" ry="12" transform="rotate(-62 104 24)" fill="#10B981" fill-opacity="0.32" stroke="#047857" stroke-width="0.75" />
+                <ellipse cx="86" cy="48" rx="6.5" ry="11" transform="rotate(-38 86 48)" fill="#34D399" fill-opacity="0.34" stroke="#047857" stroke-width="0.75" />
+                <ellipse cx="116" cy="44" rx="6" ry="10.5" transform="rotate(-84 116 44)" fill="#10B981" fill-opacity="0.28" stroke="#047857" stroke-width="0.7" />
+                <circle cx="64" cy="78" r="3.5" fill="#F59E0B" fill-opacity="0.7" />
+                <circle cx="72" cy="68" r="2.2" fill="#FB7185" fill-opacity="0.7" />
+              </svg>
+
+              <!-- Top Center Line-Art SVG: Open Book & Fountain Pen -->
+              <div class="relative z-10 flex justify-center pt-1">
+                <svg viewBox="0 0 120 74" fill="none" class="w-28 h-16 sm:w-32 sm:h-[74px]" aria-hidden="true">
+                  <path d="M60 59C51 54.5 34 53 19 56.5C16.8 57 15 55.4 15 53.1V20.8C15 19.1 16.2 17.7 17.9 17.3C33.5 13.8 50.5 15.8 60 21.5C69.5 15.8 86.5 13.8 102.1 17.3C103.8 17.7 105 19.1 105 20.8V53.1C105 55.4 103.2 57 101 56.5C86 53 69 54.5 60 59Z" stroke="#D97706" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M60 21.5V59" stroke="#D97706" stroke-width="1.25" stroke-linecap="round" />
+                  <path d="M19 59.5C34.5 56.3 50.5 57.6 60 62C69.5 57.6 85.5 56.3 101 59.5" stroke="#F59E0B" stroke-opacity="0.7" stroke-width="1" stroke-linecap="round" />
+                  <path d="M25 27C35 25.5 45 26 52 28.5M25 34C35 32.5 45 33 52 35.5M25 41C35 39.5 44 40 50 42" stroke="#0F4C5C" stroke-opacity="0.35" stroke-width="0.95" stroke-linecap="round" />
+                  <path d="M95 27C85 25.5 75 26 68 28.5M95 34C85 32.5 75 33 68 35.5M95 41C85 39.5 76 40 70 42" stroke="#0F4C5C" stroke-opacity="0.35" stroke-width="0.95" stroke-linecap="round" />
+                  <g transform="translate(65, 5) rotate(28)">
+                    <path d="M8 0L12.5 10.5L10.5 42C10.5 43.2 9.4 44 8 44C6.6 44 5.5 43.2 5.5 42L3.5 10.5L8 0Z" fill="#FFFFFF" stroke="#0F4C5C" stroke-width="1.15" stroke-linejoin="round" />
+                    <path d="M8 0V11" stroke="#0F4C5C" stroke-width="0.9" stroke-linecap="round" />
+                    <circle cx="8" cy="11.5" r="1.2" fill="#F59E0B" />
+                    <path d="M4.2 17H11.8" stroke="#F59E0B" stroke-width="1.1" />
+                  </g>
+                </svg>
+              </div>
+
+              <!-- Center Typography -->
+              <div class="relative z-10 flex flex-col items-center text-center my-auto pb-12">
+                <div class="inline-flex items-center gap-2.5 mb-2">
+                  <span class="w-6 h-px bg-[#059669]/45" aria-hidden="true"></span>
+                  <p class="font-cormorant uppercase text-[11px] sm:text-xs tracking-[0.24em] text-emeralddeep font-semibold">
+                    CHÚC MỪNG NGÀY
+                  </p>
+                  <span class="w-6 h-px bg-[#059669]/45" aria-hidden="true"></span>
+                </div>
+
+                <h1 class="font-playfair font-semibold uppercase text-[22px] sm:text-[30px] tracking-[0.1em] text-tealink leading-tight mb-3">
+                  NHÀ GIÁO VIỆT NAM
+                </h1>
+
+                <div class="relative inline-flex items-center justify-center my-1">
+                  <span class="font-playfair font-bold text-[62px] sm:text-[78px] leading-none tracking-tight text-tealink tabular-nums">
+                    20<span class="text-tealink font-normal mx-1.5">/</span>11
+                  </span>
+                </div>
+
+                <p class="font-playfair italic font-semibold text-[30px] sm:text-[38px] text-[#D97706] mt-2 leading-tight tracking-tight">
+                  Tri ân Thầy Cô
+                </p>
+
+                <p class="font-cormorant italic text-base sm:text-[17px] text-tealink/85 mt-2 max-w-xs leading-relaxed tracking-[0.01em]">
+                  “Biết ơn những người đưa đò thầm lặng”
+                </p>
+
+                <button
+                  id="btn-open-card"
+                  type="button"
+                  class="mt-7 inline-flex items-center gap-2 px-6 py-2.5 bg-tealink hover:bg-[#0B3B48] text-white text-xs font-medium tracking-[0.12em] uppercase transition-colors shadow-sm cursor-pointer"
+                >
+                  <span>Mở lời chúc</span>
+                </button>
+              </div>
+
+              <!-- Bottom-Left & Bottom Edge: Vibrant Amber/Coral Chrysanthemums + Emerald Eucalyptus -->
+              <div class="absolute bottom-0 left-0 right-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+                <svg viewBox="0 0 460 220" fill="none" class="w-[88%] max-w-[410px] h-auto -ml-2 -mb-2">
+                  <g opacity="0.86">
+                    <path d="M12 204C78 192 160 198 258 205C318 209 376 202 434 188" stroke="#059669" stroke-width="1.45" stroke-linecap="round" />
+                    <path d="M28 198C26 142 36 88 64 36" stroke="#059669" stroke-width="1.35" stroke-linecap="round" />
+                    <path d="M36 178C78 148 124 128 168 118" stroke="#10B981" stroke-width="1.2" stroke-linecap="round" />
+                    <ellipse cx="44" cy="64" rx="11" ry="18" transform="rotate(-24 44 64)" fill="#10B981" fill-opacity="0.34" stroke="#059669" stroke-width="0.9" />
+                    <ellipse cx="26" cy="96" rx="10" ry="16" transform="rotate(-48 26 96)" fill="#34D399" fill-opacity="0.36" stroke="#059669" stroke-width="0.85" />
+                    <ellipse cx="52" cy="108" rx="11" ry="17" transform="rotate(18 52 108)" fill="#10B981" fill-opacity="0.3" stroke="#059669" stroke-width="0.85" />
+                    <ellipse cx="22" cy="136" rx="11" ry="18" transform="rotate(-55 22 136)" fill="#10B981" fill-opacity="0.36" stroke="#059669" stroke-width="0.9" />
+                    <ellipse cx="96" cy="136" rx="9" ry="15" transform="rotate(42 96 136)" fill="#34D399" fill-opacity="0.34" stroke="#059669" stroke-width="0.85" />
+                    <ellipse cx="136" cy="126" rx="9" ry="14" transform="rotate(64 136 126)" fill="#10B981" fill-opacity="0.32" stroke="#059669" stroke-width="0.85" />
+                    <ellipse cx="166" cy="116" rx="7.5" ry="12" transform="rotate(75 166 116)" fill="#6EE7B7" fill-opacity="0.4" stroke="#059669" stroke-width="0.8" />
+                    <ellipse cx="212" cy="196" rx="13" ry="8.5" transform="rotate(-12 212 196)" fill="#10B981" fill-opacity="0.34" stroke="#059669" stroke-width="0.85" />
+                    <ellipse cx="268" cy="202" rx="14" ry="8.5" transform="rotate(10 268 202)" fill="#34D399" fill-opacity="0.35" stroke="#059669" stroke-width="0.85" />
+                    <ellipse cx="322" cy="198" rx="12" ry="8" transform="rotate(-16 322 198)" fill="#10B981" fill-opacity="0.3" stroke="#059669" stroke-width="0.8" />
+                    <ellipse cx="378" cy="194" rx="12" ry="7.5" transform="rotate(14 378 194)" fill="#34D399" fill-opacity="0.32" stroke="#059669" stroke-width="0.8" />
+                    <ellipse cx="422" cy="186" rx="10" ry="6.5" transform="rotate(-18 422 186)" fill="#10B981" fill-opacity="0.34" stroke="#059669" stroke-width="0.8" />
+                  </g>
+                  <!-- Main Vibrant Golden-Amber Chrysanthemum (#F59E0B) -->
+                  <g transform="translate(68, 166)" opacity="0.94">
+                    <g fill="#F59E0B" fill-opacity="0.44" stroke="#D97706" stroke-width="0.7" stroke-opacity="0.65">
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(0)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(22.5)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(45)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(67.5)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(90)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(112.5)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(135)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(157.5)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(180)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(202.5)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(225)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(247.5)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(270)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(292.5)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(315)" />
+                      <ellipse cx="0" cy="-26" rx="6.2" ry="19" transform="rotate(337.5)" />
+                    </g>
+                    <g fill="#FBBF24" fill-opacity="0.55" stroke="#D97706" stroke-width="0.65" stroke-opacity="0.6">
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(11)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(41)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(71)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(101)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(131)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(161)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(191)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(221)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(251)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(281)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(311)" />
+                      <ellipse cx="0" cy="-16" rx="4.8" ry="13" transform="rotate(341)" />
+                    </g>
+                    <circle cx="0" cy="0" r="8.5" fill="#B45309" fill-opacity="0.78" />
+                    <circle cx="0" cy="0" r="4.5" fill="#FDE68A" fill-opacity="0.92" />
+                  </g>
+                  <!-- Secondary Coral-Rose Chrysanthemum (#FB7185) -->
+                  <g transform="translate(148, 186) scale(0.74)" opacity="0.9">
+                    <g fill="#FB7185" fill-opacity="0.4" stroke="#E11D48" stroke-width="0.7" stroke-opacity="0.55">
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(0)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(30)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(60)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(90)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(120)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(150)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(180)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(210)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(240)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(270)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(300)" />
+                      <ellipse cx="0" cy="-24" rx="5.8" ry="17" transform="rotate(330)" />
+                    </g>
+                    <circle cx="0" cy="0" r="7.5" fill="#F59E0B" fill-opacity="0.82" />
+                  </g>
+                </svg>
+              </div>
+              <div class="relative z-10 h-6" aria-hidden="true"></div>
+            </div>
+          </section>
+
+          <!-- ==================== MẶT TRONG THIỆP ==================== -->
+          <section class="relative w-full h-full min-h-[680px] card-face card-face-back">
+            <div class="absolute inset-0 deckle-base rounded-sm pointer-events-none"></div>
+
+            <div class="relative h-full min-h-[680px] w-full cotton-surface rounded-sm overflow-hidden flex flex-col justify-between px-6 sm:px-10 py-8 sm:py-9">
+              <div class="absolute inset-0 pointer-events-none opacity-45 mix-blend-multiply" style="filter: url(#cotton-paper-noise)" aria-hidden="true"></div>
+              <div class="absolute inset-3.5 sm:inset-4 border border-[#C59B57]/35 pointer-events-none" aria-hidden="true">
+                <div class="absolute inset-[4px] border border-[#D4AF37]/18"></div>
+                <span class="absolute -top-px -left-px w-3.5 h-3.5 border-t-2 border-l-2 border-[#D4AF37]/70"></span>
+                <span class="absolute -top-px -right-px w-3.5 h-3.5 border-t-2 border-r-2 border-[#D4AF37]/70"></span>
+                <span class="absolute -bottom-px -left-px w-3.5 h-3.5 border-b-2 border-l-2 border-[#D4AF37]/70"></span>
+                <span class="absolute -bottom-px -right-px w-3.5 h-3.5 border-b-2 border-r-2 border-[#D4AF37]/70"></span>
+              </div>
+
+              <!-- Top Controls -->
+              <div class="relative z-10 flex items-center justify-between gap-2 pb-4 border-b border-amberbloom/30">
+                <button id="btn-flip-front" type="button" class="text-xs font-semibold text-emeralddeep hover:text-tealink transition-colors cursor-pointer">
+                  ← Mặt trước
+                </button>
+                <div class="inline-flex items-center border border-amberbloom/45 bg-white/80">
+                  <button id="btn-music" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-tealink hover:bg-sunlight/50 transition-colors cursor-pointer">
+                    <span class="inline-flex items-end gap-[2px] h-3.5" aria-hidden="true">
+                      <span class="audio-bar bg-tealink/45" style="transform: scaleY(0.38); animation-delay: 0s;"></span>
+                      <span class="audio-bar bg-tealink/45" style="transform: scaleY(0.72); animation-delay: 0.16s;"></span>
+                      <span class="audio-bar bg-tealink/45" style="transform: scaleY(0.52); animation-delay: 0.32s;"></span>
+                      <span class="audio-bar bg-tealink/45" style="transform: scaleY(0.62); animation-delay: 0.48s;"></span>
+                    </span>
+                    <span id="music-label">Nghe nhạc</span>
+                  </button>
+                  <button id="btn-next-song" type="button" title="Đổi bài hát khác" aria-label="Đổi bài hát khác" class="px-2 py-1 border-l border-amberbloom/35 text-[11px] font-medium text-tealink/80 hover:text-[#D97706] hover:bg-sunlight/50 transition-colors cursor-pointer">
+                    ⏭
+                  </button>
+                </div>
+              </div>
+
+              <!-- Letter Body (Staggered Reveal, View-Only for Recipient) -->
+              <div class="relative z-10 flex-1 flex flex-col justify-center py-4">
+                <div class="text-center mb-5 inner-reveal" style="transition-delay: 260ms;">
+                  <p class="font-cormorant uppercase text-[11px] tracking-[0.24em] text-emeralddeep font-semibold mb-1">20 · 11 · Ngày Nhà Giáo Việt Nam</p>
+                  <p class="font-script text-[30px] sm:text-[34px] text-[#D97706] leading-tight mb-0.5">Kính gửi</p>
+                  <h2 id="display-teacher" class="font-playfair font-semibold text-2xl sm:text-[28px] text-tealink tracking-[0.01em]">Cô Nguyễn Minh Anh</h2>
+                </div>
+
+                <div class="h-px w-20 mx-auto bg-amberbloom/50 mb-5 inner-reveal" style="transition-delay: 400ms;"></div>
+
+                <p id="display-message" class="font-cormorant font-medium text-[18px] sm:text-[19px] leading-[1.8] text-tealink text-left max-w-md mx-auto whitespace-pre-line first-letter:text-[44px] first-letter:font-playfair first-letter:italic first-letter:font-semibold first-letter:text-[#D97706] first-letter:float-left first-letter:mr-2.5 first-letter:leading-[0.88] first-letter:mt-1 inner-reveal" style="transition-delay: 540ms;">Nhân ngày Nhà giáo Việt Nam 20 tháng 11, chúng em xin gửi tới Thầy/Cô lời tri ân chân thành và sâu sắc nhất. Cảm ơn Thầy/Cô đã luôn kiên nhẫn dìu dắt, thắp sáng ngọn lửa tri thức và trao cho chúng em biết bao bài học quý giá về cuộc sống. Kính chúc Thầy/Cô luôn mạnh khỏe, bình an và giữ mãi niềm hạnh phúc bên trang giáo án thân yêu.</p>
+              </div>
+
+              <!-- Signature Footer -->
+              <div class="relative z-10 pt-4 border-t border-amberbloom/30 flex items-end justify-between inner-reveal" style="transition-delay: 680ms;">
+                <span class="font-cormorant italic text-[13px] text-emeralddeep font-medium">“Biết ơn những người đưa đò thầm lặng”</span>
+                <div class="text-right">
+                  <p class="font-script text-[26px] text-[#D97706] leading-none mb-1">Kính tặng,</p>
+                  <p id="display-sender" class="font-playfair italic font-semibold text-[17px] text-tealink tracking-[0.01em]">Tập thể học sinh lớp 12A1</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const envelopeOverlay = document.getElementById('envelope-overlay');
+      const envelopeFlap = document.getElementById('envelope-flap');
+      const envelopeInner = document.getElementById('envelope-inner-card');
+      const envelopeRibbon = document.getElementById('envelope-ribbon');
+      const envelopeLabel = document.getElementById('envelope-label');
+      const btnWaxSeal = document.getElementById('btn-wax-seal');
+      const btnBreakSealText = document.getElementById('btn-break-seal-text');
+      const envelopeRecipient = document.getElementById('envelope-recipient');
+
+      const cardStage = document.getElementById('card-stage');
+      const cardTilt = document.getElementById('card-tilt');
+      const flipper = document.getElementById('card-flipper');
+      const cardFront = document.getElementById('card-front');
+      const btnOpen = document.getElementById('btn-open-card');
+      const btnFlipFront = document.getElementById('btn-flip-front');
+      const btnMusic = document.getElementById('btn-music');
+      const musicLabel = document.getElementById('music-label');
+      const audioBars = document.querySelectorAll('.audio-bar');
+
+      const btnNextSong = document.getElementById('btn-next-song');
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Studio-Grade Web Audio Grand Piano + Chamber Strings + Stereo Hall Reverb
+      let audioCtx = null;
+      let dryGain = null;
+      let wetNode = null;
+      let musicTimer = null;
+      let musicPlaying = false;
+      let measureIdx = 0;
+      let trackIdx = 0;
+
+      const midiToFreq = (m) => 440 * Math.pow(2, (m - 69) / 12);
+      const arp2 = (n) => [
+        { midi: n[0], off: 0, beats: 1.9, vel: 0.42 },
+        { midi: n[1], off: 0.5, beats: 1.4, vel: 0.32 },
+        { midi: n[2], off: 1.0, beats: 1.0, vel: 0.36 },
+        { midi: n[3], off: 1.5, beats: 0.9, vel: 0.3 },
+      ];
+      const waltz3 = (b, c) => [
+        { midi: b, off: 0, beats: 2.7, vel: 0.46 },
+        { midi: c[0], off: 1, beats: 1.1, vel: 0.25 },
+        { midi: c[1], off: 1.02, beats: 1.1, vel: 0.24 },
+        { midi: c[2], off: 1.04, beats: 1.1, vel: 0.24 },
+        { midi: c[0], off: 2, beats: 0.95, vel: 0.21 },
+        { midi: c[1], off: 2.02, beats: 0.95, vel: 0.2 },
+        { midi: c[2], off: 2.04, beats: 0.95, vel: 0.2 },
+      ];
+
+      const TRACKS = [
+        {
+          name: 'Bụi Phấn (Không lời)',
+          bpm: 92,
+          measures: [
+            { total: 3, mel: [{ midi: 76, off: 2, beats: 0.9, vel: 0.58 }], arp: waltz3(48, [55, 60, 64]), pad: [48] },
+            { total: 3, flute: true, mel: [{ midi: 67, off: 0, beats: 1.4, vel: 0.74 }, { midi: 69, off: 1.5, beats: 0.55, vel: 0.72 }, { midi: 67, off: 2, beats: 1.05, vel: 0.74 }], arp: waltz3(48, [55, 60, 64]), pad: [48] },
+            { total: 3, flute: true, mel: [{ midi: 64, off: 0, beats: 1.4, vel: 0.74 }, { midi: 67, off: 1.5, beats: 0.55, vel: 0.7 }, { midi: 62, off: 2, beats: 1.05, vel: 0.72 }], arp: waltz3(45, [52, 57, 60]) },
+            { total: 3, flute: true, mel: [{ midi: 60, off: 0, beats: 2.7, vel: 0.76 }], arp: waltz3(48, [55, 60, 64]), pad: [48] },
+            { total: 3, flute: true, mel: [{ midi: 62, off: 0, beats: 1.4, vel: 0.74 }, { midi: 64, off: 1.5, beats: 0.55, vel: 0.72 }, { midi: 67, off: 2, beats: 1.05, vel: 0.78 }], arp: waltz3(41, [53, 57, 60]), pad: [41] },
+            { total: 3, flute: true, mel: [{ midi: 69, off: 0, beats: 1.4, vel: 0.78 }, { midi: 72, off: 1.5, beats: 0.55, vel: 0.8 }, { midi: 69, off: 2, beats: 1.05, vel: 0.74 }], arp: waltz3(48, [55, 60, 64]) },
+            { total: 3, flute: true, mel: [{ midi: 67, off: 0, beats: 1.6, vel: 0.76 }, { midi: 64, off: 2, beats: 1.1, vel: 0.7 }], arp: waltz3(48, [55, 60, 64]) },
+            { total: 3, flute: true, mel: [{ midi: 62, off: 0, beats: 1.4, vel: 0.74 }, { midi: 64, off: 1.5, beats: 0.55, vel: 0.74 }, { midi: 67, off: 2, beats: 1.05, vel: 0.78 }], arp: waltz3(50, [53, 57, 62]), pad: [50] },
+            { total: 3, flute: true, mel: [{ midi: 69, off: 0, beats: 1.4, vel: 0.78 }, { midi: 71, off: 1.5, beats: 0.55, vel: 0.78 }, { midi: 72, off: 2, beats: 1.05, vel: 0.82 }], arp: waltz3(43, [50, 55, 59]) },
+            { total: 3, flute: true, mel: [{ midi: 74, off: 0, beats: 2.7, vel: 0.8 }], arp: waltz3(43, [50, 55, 59]), pad: [43] },
+            { total: 3, flute: true, mel: [{ midi: 72, off: 0, beats: 1.0, vel: 0.82 }, { midi: 74, off: 1.0, beats: 1.0, vel: 0.82 }, { midi: 76, off: 2.0, beats: 1.0, vel: 0.85 }], arp: waltz3(48, [55, 60, 64]), pad: [48] },
+            { total: 3, flute: true, mel: [{ midi: 74, off: 0, beats: 1.4, vel: 0.8 }, { midi: 72, off: 1.5, beats: 1.5, vel: 0.78 }], arp: waltz3(45, [52, 57, 60]) },
+            { total: 3, flute: true, mel: [{ midi: 69, off: 0, beats: 1.0, vel: 0.76 }, { midi: 72, off: 1.0, beats: 1.0, vel: 0.8 }, { midi: 74, off: 2.0, beats: 1.0, vel: 0.8 }], arp: waltz3(41, [53, 57, 60]), pad: [41] },
+            { total: 3, flute: true, mel: [{ midi: 72, off: 0, beats: 1.4, vel: 0.78 }, { midi: 69, off: 1.5, beats: 0.6, vel: 0.74 }, { midi: 67, off: 2.0, beats: 1.0, vel: 0.74 }], arp: waltz3(48, [55, 60, 64]) },
+            { total: 3, flute: true, mel: [{ midi: 69, off: 0, beats: 1.0, vel: 0.78 }, { midi: 72, off: 1.0, beats: 1.0, vel: 0.8 }, { midi: 74, off: 2.0, beats: 1.0, vel: 0.8 }], arp: waltz3(41, [53, 57, 60]) },
+            { total: 3, flute: true, mel: [{ midi: 72, off: 0, beats: 1.4, vel: 0.78 }, { midi: 69, off: 1.5, beats: 1.5, vel: 0.74 }], arp: waltz3(43, [50, 55, 59]) },
+            { total: 3, flute: true, mel: [{ midi: 64, off: 0, beats: 1.0, vel: 0.74 }, { midi: 67, off: 1.0, beats: 1.0, vel: 0.76 }, { midi: 69, off: 2.0, beats: 1.0, vel: 0.78 }], arp: waltz3(50, [53, 57, 62]) },
+            { total: 3, flute: true, mel: [{ midi: 67, off: 0, beats: 1.4, vel: 0.76 }, { midi: 62, off: 1.5, beats: 1.5, vel: 0.72 }], arp: waltz3(43, [50, 55, 59]) },
+            { total: 3, flute: true, mel: [{ midi: 72, off: 0, beats: 3.2, vel: 0.82 }], arp: [{ midi: 48, off: 0, beats: 3.2, vel: 0.45 }, { midi: 55, off: 0.08, beats: 3.1, vel: 0.3 }, { midi: 60, off: 0.16, beats: 3.0, vel: 0.32 }, { midi: 64, off: 0.24, beats: 2.9, vel: 0.3 }], pad: [48] },
+          ],
+        },
+        {
+          name: 'Người Thầy (Không lời)',
+          bpm: 68,
+          measures: [
+            { total: 2, mel: [{ midi: 64, off: 0, beats: 0.55, vel: 0.72 }, { midi: 69, off: 0.5, beats: 0.6, vel: 0.78 }, { midi: 71, off: 1.0, beats: 0.55, vel: 0.76 }, { midi: 72, off: 1.5, beats: 0.6, vel: 0.8 }], arp: arp2([45, 52, 57, 60]), pad: [45] },
+            { total: 2, mel: [{ midi: 71, off: 0, beats: 0.55, vel: 0.75 }, { midi: 69, off: 0.5, beats: 0.55, vel: 0.74 }, { midi: 67, off: 1.0, beats: 0.55, vel: 0.72 }, { midi: 69, off: 1.5, beats: 1.1, vel: 0.78 }], arp: arp2([40, 47, 52, 55]) },
+            { total: 2, mel: [{ midi: 64, off: 0, beats: 0.55, vel: 0.72 }, { midi: 69, off: 0.5, beats: 0.6, vel: 0.76 }, { midi: 71, off: 1.0, beats: 0.55, vel: 0.76 }, { midi: 72, off: 1.5, beats: 0.6, vel: 0.8 }], arp: arp2([41, 48, 53, 57]), pad: [41] },
+            { total: 2, mel: [{ midi: 71, off: 0, beats: 0.55, vel: 0.74 }, { midi: 69, off: 0.5, beats: 0.55, vel: 0.74 }, { midi: 67, off: 1.0, beats: 1.1, vel: 0.72 }], arp: arp2([43, 50, 55, 59]) },
+            { total: 2, flute: true, mel: [{ midi: 69, off: 0, beats: 0.55, vel: 0.78 }, { midi: 72, off: 0.5, beats: 0.55, vel: 0.8 }, { midi: 74, off: 1.0, beats: 0.55, vel: 0.82 }, { midi: 76, off: 1.5, beats: 0.7, vel: 0.85 }], arp: arp2([48, 55, 60, 64]), pad: [48] },
+            { total: 2, flute: true, mel: [{ midi: 74, off: 0, beats: 0.55, vel: 0.8 }, { midi: 72, off: 0.5, beats: 0.55, vel: 0.76 }, { midi: 69, off: 1.0, beats: 1.1, vel: 0.76 }], arp: arp2([43, 50, 55, 59]) },
+            { total: 2, flute: true, mel: [{ midi: 69, off: 0, beats: 0.55, vel: 0.76 }, { midi: 72, off: 0.5, beats: 0.55, vel: 0.78 }, { midi: 74, off: 1.0, beats: 0.55, vel: 0.82 }, { midi: 72, off: 1.5, beats: 0.6, vel: 0.76 }], arp: arp2([41, 48, 53, 57]), pad: [41] },
+            { total: 2, flute: true, mel: [{ midi: 69, off: 0, beats: 0.55, vel: 0.75 }, { midi: 67, off: 0.5, beats: 0.55, vel: 0.72 }, { midi: 64, off: 1.0, beats: 0.55, vel: 0.7 }, { midi: 69, off: 1.5, beats: 1.8, vel: 0.78 }], arp: arp2([45, 52, 57, 60]), pad: [45] },
+          ],
+        },
+        {
+          name: 'Mong Ước Kỷ Niệm Xưa',
+          bpm: 74,
+          measures: [
+            { total: 2, mel: [{ midi: 62, off: 0, beats: 0.55, vel: 0.72 }, { midi: 67, off: 0.5, beats: 0.55, vel: 0.76 }, { midi: 69, off: 1.0, beats: 0.55, vel: 0.76 }, { midi: 71, off: 1.5, beats: 0.6, vel: 0.78 }], arp: arp2([43, 50, 55, 59]), pad: [43] },
+            { total: 2, mel: [{ midi: 69, off: 0, beats: 0.85, vel: 0.76 }, { midi: 67, off: 0.75, beats: 0.45, vel: 0.72 }, { midi: 64, off: 1.25, beats: 0.85, vel: 0.72 }], arp: arp2([42, 50, 54, 57]) },
+            { total: 2, mel: [{ midi: 62, off: 0, beats: 0.55, vel: 0.72 }, { midi: 67, off: 0.5, beats: 0.55, vel: 0.76 }, { midi: 69, off: 1.0, beats: 0.55, vel: 0.78 }, { midi: 71, off: 1.5, beats: 0.6, vel: 0.8 }], arp: arp2([40, 47, 52, 55]), pad: [40] },
+            { total: 2, mel: [{ midi: 69, off: 0, beats: 0.7, vel: 0.76 }, { midi: 67, off: 0.75, beats: 0.55, vel: 0.74 }, { midi: 67, off: 1.25, beats: 0.9, vel: 0.74 }], arp: arp2([47, 54, 59, 62]) },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 71, off: 0, beats: 0.55, vel: 0.78 }, { midi: 74, off: 0.5, beats: 0.55, vel: 0.8 }, { midi: 76, off: 1.0, beats: 0.55, vel: 0.84 }, { midi: 74, off: 1.5, beats: 0.6, vel: 0.78 }], arp: arp2([48, 55, 60, 64]), pad: [48] },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 71, off: 0, beats: 0.55, vel: 0.76 }, { midi: 69, off: 0.5, beats: 0.55, vel: 0.74 }, { midi: 67, off: 1.0, beats: 0.55, vel: 0.74 }, { midi: 69, off: 1.5, beats: 0.75, vel: 0.76 }], arp: arp2([43, 50, 55, 59]) },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 71, off: 0, beats: 0.55, vel: 0.78 }, { midi: 74, off: 0.5, beats: 0.55, vel: 0.8 }, { midi: 76, off: 1.0, beats: 0.55, vel: 0.84 }, { midi: 74, off: 1.5, beats: 0.6, vel: 0.78 }], arp: arp2([45, 52, 57, 60]), pad: [45] },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 71, off: 0, beats: 0.55, vel: 0.76 }, { midi: 69, off: 0.5, beats: 0.55, vel: 0.74 }, { midi: 67, off: 1.0, beats: 1.6, vel: 0.78 }], arp: arp2([50, 57, 62, 66]), pad: [43] },
+          ],
+        },
+        {
+          name: 'Nhớ Ơn Thầy Cô (Không lời)',
+          bpm: 78,
+          measures: [
+            { total: 2, celesta: true, mel: [{ midi: 65, off: 0, beats: 0.55, vel: 0.74 }, { midi: 67, off: 0.5, beats: 0.55, vel: 0.74 }, { midi: 69, off: 1.0, beats: 0.55, vel: 0.78 }, { midi: 72, off: 1.5, beats: 0.6, vel: 0.8 }], arp: arp2([41, 48, 53, 57]), pad: [41] },
+            { total: 2, celesta: true, mel: [{ midi: 74, off: 0, beats: 0.85, vel: 0.82 }, { midi: 72, off: 0.75, beats: 0.45, vel: 0.76 }, { midi: 69, off: 1.25, beats: 0.9, vel: 0.75 }], arp: arp2([38, 45, 50, 53]) },
+            { total: 2, celesta: true, mel: [{ midi: 70, off: 0, beats: 0.55, vel: 0.76 }, { midi: 69, off: 0.5, beats: 0.55, vel: 0.74 }, { midi: 67, off: 1.0, beats: 0.55, vel: 0.72 }, { midi: 65, off: 1.5, beats: 0.6, vel: 0.72 }], arp: arp2([46, 53, 58, 62]), pad: [46] },
+            { total: 2, celesta: true, mel: [{ midi: 67, off: 0, beats: 1.1, vel: 0.76 }, { midi: 64, off: 1.0, beats: 1.1, vel: 0.72 }], arp: arp2([48, 55, 60, 64]) },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 69, off: 0, beats: 0.55, vel: 0.78 }, { midi: 72, off: 0.5, beats: 0.55, vel: 0.8 }, { midi: 74, off: 1.0, beats: 0.55, vel: 0.82 }, { midi: 77, off: 1.5, beats: 0.65, vel: 0.84 }], arp: arp2([41, 48, 53, 57]), pad: [41] },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 76, off: 0, beats: 0.55, vel: 0.82 }, { midi: 74, off: 0.5, beats: 0.55, vel: 0.78 }, { midi: 72, off: 1.0, beats: 1.1, vel: 0.78 }], arp: arp2([48, 55, 60, 64]) },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 70, off: 0, beats: 0.55, vel: 0.78 }, { midi: 69, off: 0.5, beats: 0.55, vel: 0.76 }, { midi: 67, off: 1.0, beats: 1.0, vel: 0.74 }], arp: arp2([43, 50, 55, 58]) },
+            { total: 2, flute: true, celesta: true, mel: [{ midi: 65, off: 0, beats: 2.3, vel: 0.8 }], arp: arp2([41, 48, 53, 57]), pad: [41] },
+          ],
+        },
+        {
+          name: 'Canon in D',
+          bpm: 64,
+          measures: [
+            { total: 2, mel: [], arp: arp2([50, 57, 62, 66]), pad: [50] },
+            { total: 2, mel: [], arp: arp2([45, 52, 57, 61]), pad: [45] },
+            { total: 2, mel: [{ midi: 78, off: 0, beats: 2.1, vel: 0.78 }], arp: arp2([50, 57, 62, 66]), pad: [50] },
+            { total: 2, mel: [{ midi: 76, off: 0, beats: 2.1, vel: 0.72 }], arp: arp2([45, 52, 57, 61]), pad: [45] },
+            { total: 2, mel: [{ midi: 74, off: 0, beats: 2.1, vel: 0.75 }], arp: arp2([47, 54, 59, 62]), pad: [47] },
+            { total: 2, mel: [{ midi: 73, off: 0, beats: 2.1, vel: 0.7 }], arp: arp2([42, 49, 54, 57]), pad: [42] },
+            { total: 2, mel: [{ midi: 71, off: 0, beats: 2.1, vel: 0.74 }], arp: arp2([43, 50, 55, 59]), pad: [43] },
+            { total: 2, mel: [{ midi: 69, off: 0, beats: 2.1, vel: 0.68 }], arp: arp2([38, 45, 50, 54]), pad: [38] },
+            { total: 2, mel: [{ midi: 71, off: 0, beats: 2.1, vel: 0.72 }], arp: arp2([43, 50, 55, 59]), pad: [43] },
+            { total: 2, mel: [{ midi: 73, off: 0, beats: 2.1, vel: 0.74 }], arp: arp2([45, 52, 57, 61]), pad: [45] },
+            { total: 2, mel: [{ midi: 74, off: 0, beats: 0.65, vel: 0.76 }, { midi: 78, off: 0.5, beats: 0.65, vel: 0.72 }, { midi: 81, off: 1.0, beats: 0.65, vel: 0.8 }, { midi: 79, off: 1.5, beats: 0.65, vel: 0.7 }], arp: arp2([50, 57, 62, 66]), pad: [50] },
+            { total: 2, mel: [{ midi: 78, off: 0, beats: 0.65, vel: 0.76 }, { midi: 74, off: 0.5, beats: 0.65, vel: 0.68 }, { midi: 76, off: 1.0, beats: 1.2, vel: 0.74 }], arp: arp2([45, 52, 57, 61]), pad: [45] },
+            { total: 2, mel: [{ midi: 74, off: 0, beats: 0.65, vel: 0.75 }, { midi: 78, off: 0.5, beats: 0.65, vel: 0.72 }, { midi: 71, off: 1.0, beats: 0.65, vel: 0.68 }, { midi: 74, off: 1.5, beats: 0.65, vel: 0.72 }], arp: arp2([47, 54, 59, 62]), pad: [47] },
+            { total: 2, mel: [{ midi: 73, off: 0, beats: 0.65, vel: 0.74 }, { midi: 69, off: 0.5, beats: 0.65, vel: 0.66 }, { midi: 73, off: 1.0, beats: 1.2, vel: 0.72 }], arp: arp2([42, 49, 54, 57]), pad: [42] },
+            { total: 2, mel: [{ midi: 71, off: 0, beats: 0.65, vel: 0.76 }, { midi: 74, off: 0.5, beats: 0.65, vel: 0.72 }, { midi: 79, off: 1.0, beats: 0.65, vel: 0.8 }, { midi: 78, off: 1.5, beats: 0.65, vel: 0.72 }], arp: arp2([43, 50, 55, 59]), pad: [43] },
+            { total: 2, mel: [{ midi: 78, off: 0, beats: 0.65, vel: 0.75 }, { midi: 74, off: 0.5, beats: 0.65, vel: 0.7 }, { midi: 69, off: 1.0, beats: 1.2, vel: 0.72 }], arp: arp2([38, 45, 50, 54]), pad: [38] },
+          ],
+        },
+      ];
+
+      function ensureAudioGraph() {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        if (!audioCtx) {
+          audioCtx = new Ctx();
+          const comp = audioCtx.createDynamicsCompressor();
+          comp.threshold.setValueAtTime(-14, audioCtx.currentTime);
+          comp.ratio.setValueAtTime(3.5, audioCtx.currentTime);
+          const master = audioCtx.createGain();
+          master.gain.value = 0.48;
+          dryGain = audioCtx.createGain();
+          dryGain.gain.value = 0.76;
+          const wet = audioCtx.createGain();
+          wet.gain.value = 0.36;
+
+          const len = Math.floor(audioCtx.sampleRate * 2.4);
+          const buf = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
+          for (let ch = 0; ch < 2; ch++) {
+            const d = buf.getChannelData(ch);
+            let prev = 0;
+            for (let i = 0; i < len; i++) {
+              const raw = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.7);
+              prev = prev * 0.72 + raw * 0.28;
+              d[i] = prev;
+            }
+          }
+          const conv = audioCtx.createConvolver();
+          conv.buffer = buf;
+          dryGain.connect(comp);
+          conv.connect(wet);
+          wet.connect(comp);
+          comp.connect(master);
+          master.connect(audioCtx.destination);
+          wetNode = conv;
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+      }
+
+      function playPianoNote(midi, when, dur, vel) {
+        if (!audioCtx || !dryGain || !wetNode) return;
+        const f = midiToFreq(midi);
+        const total = Math.max(0.45, dur * 1.45);
+        const filt = audioCtx.createBiquadFilter();
+        filt.type = 'lowpass';
+        filt.frequency.setValueAtTime(Math.min(5400, Math.max(1200, f * 5.6)), when);
+        filt.frequency.exponentialRampToValueAtTime(Math.max(620, f * 1.85), when + Math.min(0.95, total * 0.65));
+
+        const env = audioCtx.createGain();
+        const peak = Math.min(0.42, vel * 0.32);
+        env.gain.setValueAtTime(0.0001, when);
+        env.gain.linearRampToValueAtTime(peak, when + 0.012);
+        env.gain.exponentialRampToValueAtTime(peak * 0.42, when + Math.min(0.35, total * 0.3));
+        env.gain.exponentialRampToValueAtTime(0.0001, when + total);
+
+        const o1 = audioCtx.createOscillator();
+        o1.type = 'sine';
+        o1.frequency.setValueAtTime(f, when);
+        const g1 = audioCtx.createGain();
+        g1.gain.value = 0.76;
+
+        const o2 = audioCtx.createOscillator();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(f * 2, when);
+        const g2 = audioCtx.createGain();
+        g2.gain.setValueAtTime(0.2, when);
+        g2.gain.exponentialRampToValueAtTime(0.04, when + total * 0.55);
+
+        const o3 = audioCtx.createOscillator();
+        o3.type = 'triangle';
+        o3.frequency.setValueAtTime(f * 3, when);
+        const g3 = audioCtx.createGain();
+        g3.gain.setValueAtTime(0.06, when);
+        g3.gain.exponentialRampToValueAtTime(0.001, when + 0.22);
+
+        o1.connect(g1); o2.connect(g2); o3.connect(g3);
+        g1.connect(filt); g2.connect(filt); g3.connect(filt);
+        filt.connect(env); env.connect(dryGain); env.connect(wetNode);
+        o1.start(when); o2.start(when); o3.start(when);
+        o1.stop(when + total + 0.05); o2.stop(when + total + 0.05); o3.stop(when + total + 0.05);
+      }
+
+      function playFluteLead(midi, when, dur, vel) {
+        if (!audioCtx || !dryGain || !wetNode) return;
+        const f = midiToFreq(midi + 12);
+        const total = Math.max(0.32, dur * 1.08);
+        const filt = audioCtx.createBiquadFilter();
+        filt.type = 'lowpass';
+        filt.frequency.setValueAtTime(2100, when);
+
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, when);
+
+        const lfo = audioCtx.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.setValueAtTime(5.2, when);
+        const lfoDepth = audioCtx.createGain();
+        lfoDepth.gain.setValueAtTime(0, when);
+        lfoDepth.gain.linearRampToValueAtTime(f * 0.0035, when + Math.min(0.28, total * 0.45));
+        lfo.connect(lfoDepth);
+        lfoDepth.connect(osc.frequency);
+
+        const env = audioCtx.createGain();
+        const peak = Math.min(0.16, (vel || 0.65) * 0.14);
+        env.gain.setValueAtTime(0.0001, when);
+        env.gain.linearRampToValueAtTime(peak, when + 0.075);
+        env.gain.exponentialRampToValueAtTime(peak * 0.72, when + total * 0.75);
+        env.gain.exponentialRampToValueAtTime(0.0001, when + total);
+
+        osc.connect(filt); filt.connect(env);
+        env.connect(dryGain); env.connect(wetNode);
+        osc.start(when); lfo.start(when);
+        osc.stop(when + total + 0.04); lfo.stop(when + total + 0.04);
+      }
+
+      function playCelestaChime(midi, when, dur, vel) {
+        if (!audioCtx || !dryGain || !wetNode) return;
+        const f = midiToFreq(midi + 12);
+        const total = Math.max(0.7, dur * 1.4);
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, when);
+        const env = audioCtx.createGain();
+        env.gain.setValueAtTime(0.0001, when);
+        env.gain.linearRampToValueAtTime((vel || 0.4) * 0.14, when + 0.008);
+        env.gain.exponentialRampToValueAtTime(0.0001, when + total);
+        osc.connect(env); env.connect(dryGain); env.connect(wetNode);
+        osc.start(when); osc.stop(when + total + 0.05);
+      }
+
+      function playPadNote(midi, when, dur) {
+        if (!audioCtx || !dryGain || !wetNode) return;
+        const f = midiToFreq(midi);
+        const filt = audioCtx.createBiquadFilter();
+        filt.type = 'lowpass';
+        filt.frequency.setValueAtTime(720, when);
+        const env = audioCtx.createGain();
+        env.gain.setValueAtTime(0.0001, when);
+        env.gain.linearRampToValueAtTime(0.11, when + 0.42);
+        env.gain.exponentialRampToValueAtTime(0.0001, when + dur * 1.25);
+
+        const oa = audioCtx.createOscillator();
+        oa.type = 'triangle'; oa.frequency.setValueAtTime(f, when); oa.detune.setValueAtTime(-4.5, when);
+        const ob = audioCtx.createOscillator();
+        ob.type = 'sine'; ob.frequency.setValueAtTime(f, when); ob.detune.setValueAtTime(4.5, when);
+        oa.connect(filt); ob.connect(filt); filt.connect(env);
+        env.connect(dryGain); env.connect(wetNode);
+        oa.start(when); ob.start(when);
+        oa.stop(when + dur * 1.3); ob.stop(when + dur * 1.3);
+      }
+
+      function updateAudioUI(playing) {
+        musicLabel.textContent = playing ? TRACKS[trackIdx].name : 'Nghe nhạc';
+        audioBars.forEach((bar) => bar.classList.toggle('playing', playing));
+      }
+
+      function scheduleNextBar() {
+        if (!musicPlaying || !audioCtx) return;
+        const track = TRACKS[trackIdx];
+        const secPerBeat = 60 / track.bpm;
+        const m = track.measures[measureIdx % track.measures.length];
+        const base = audioCtx.currentTime + 0.05;
+
+        m.mel.forEach((n) => {
+          const when = base + n.off * secPerBeat;
+          const dur = n.beats * secPerBeat;
+          playPianoNote(n.midi, when, dur, n.vel);
+          if (m.flute) playFluteLead(n.midi, when, dur, n.vel);
+          if (m.celesta) playCelestaChime(n.midi, when, dur, n.vel);
+        });
+        m.arp.forEach((n) => playPianoNote(n.midi, base + n.off * secPerBeat, n.beats * secPerBeat, n.vel));
+        if (m.pad) m.pad.forEach((pm) => playPadNote(pm, base, m.total * secPerBeat));
+
+        measureIdx = (measureIdx + 1) % track.measures.length;
+        musicTimer = window.setTimeout(scheduleNextBar, Math.max(180, m.total * secPerBeat * 1000 - 30));
+      }
+
+      function startMusic() {
+        if (musicPlaying) return;
+        try {
+          if (!ensureAudioGraph()) return;
+          musicPlaying = true;
+          measureIdx = 0;
+          updateAudioUI(true);
+          scheduleNextBar();
+        } catch {}
+      }
+
+      function stopMusic() {
+        musicPlaying = false;
+        if (musicTimer) {
+          clearTimeout(musicTimer);
+          musicTimer = null;
+        }
+        updateAudioUI(false);
+      }
+
+      btnMusic.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (musicPlaying) stopMusic();
+        else startMusic();
+      });
+
+      btnNextSong.addEventListener('click', (e) => {
+        e.stopPropagation();
+        trackIdx = (trackIdx + 1) % TRACKS.length;
+        stopMusic();
+        startMusic();
+      });
+
+      // Envelope Reveal Flow
+      function revealMainCard() {
+        envelopeOverlay.classList.add('opacity-0', 'pointer-events-none');
+        cardStage.classList.remove('opacity-0', 'translate-y-8');
+        setTimeout(() => {
+          envelopeOverlay.style.display = 'none';
+        }, 520);
+      }
+
+      function openEnvelope(playAudio) {
+        if (playAudio) startMusic();
+        btnWaxSeal.style.opacity = '0';
+        btnWaxSeal.style.transform = 'translate(-50%, -50%) scale(1.25)';
+        envelopeRibbon.style.opacity = '0';
+        envelopeLabel.style.opacity = '0';
+        envelopeFlap.style.transform = 'rotateX(172deg)';
+        envelopeFlap.style.zIndex = '5';
+        envelopeInner.style.transform = 'translateY(-88px) scale(1.03)';
+        setTimeout(revealMainCard, 720);
+      }
+
+      btnWaxSeal.addEventListener('click', () => openEnvelope(true));
+      btnBreakSealText.addEventListener('click', () => openEnvelope(true));
+
+      // Interactive Click-Anywhere Botanical Blossom & Petal Burst (60fps)
+      const burstCanvas = document.getElementById('burst-canvas');
+      const bCtx = burstCanvas.getContext('2d');
+      const burstPool = [];
+      let burstRaf = null;
+
+      function sizeBurstCanvas() {
+        if (!burstCanvas || !bCtx) return;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (burstCanvas.width !== Math.round(w * dpr) || burstCanvas.height !== Math.round(h * dpr)) {
+          burstCanvas.width = Math.round(w * dpr);
+          burstCanvas.height = Math.round(h * dpr);
+        }
+        bCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function runBurstLoop() {
+        if (burstRaf !== null || !bCtx) return;
+        sizeBurstCanvas();
+
+        function renderBurst() {
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          bCtx.clearRect(0, 0, w, h);
+
+          let writeIdx = 0;
+          for (let i = 0; i < burstPool.length; i++) {
+            const p = burstPool[i];
+            p.vx *= 0.968;
+            p.vy = p.vy * 0.968 + 0.055;
+            p.swayPhase += p.swaySpeed;
+            p.x += p.vx + Math.sin(p.swayPhase) * 0.35;
+            p.y += p.vy;
+            p.rot += p.vr;
+            p.alpha -= p.decay;
+            if (p.alpha <= 0.02) continue;
+            burstPool[writeIdx++] = p;
+
+            bCtx.save();
+            bCtx.globalAlpha = Math.max(0, Math.min(1, p.alpha));
+            bCtx.translate(p.x, p.y);
+            bCtx.rotate(p.rot);
+
+            if (p.kind === 'flower') {
+              bCtx.fillStyle = p.color;
+              for (let k = 0; k < 5; k++) {
+                bCtx.save();
+                bCtx.rotate((Math.PI * 2 * k) / 5);
+                bCtx.beginPath();
+                bCtx.ellipse(0, -p.size * 0.68, p.size * 0.34, p.size * 0.62, 0, 0, Math.PI * 2);
+                bCtx.fill();
+                bCtx.restore();
+              }
+              bCtx.fillStyle = p.centerColor;
+              bCtx.beginPath();
+              bCtx.arc(0, 0, p.size * 0.28, 0, Math.PI * 2);
+              bCtx.fill();
+            } else if (p.kind === 'petal') {
+              bCtx.fillStyle = p.color;
+              bCtx.beginPath();
+              bCtx.moveTo(0, -p.size);
+              bCtx.quadraticCurveTo(p.size * 0.65, -p.size * 0.2, 0, p.size);
+              bCtx.quadraticCurveTo(-p.size * 0.65, -p.size * 0.2, 0, -p.size);
+              bCtx.fill();
+            } else if (p.kind === 'leaf') {
+              bCtx.fillStyle = p.color;
+              bCtx.beginPath();
+              bCtx.ellipse(0, 0, p.size * 0.42, p.size * 0.9, 0, 0, Math.PI * 2);
+              bCtx.fill();
+            } else {
+              bCtx.fillStyle = p.color;
+              bCtx.shadowColor = '#D4AF37';
+              bCtx.shadowBlur = p.size * 3;
+              bCtx.beginPath();
+              bCtx.arc(0, 0, p.size, 0, Math.PI * 2);
+              bCtx.fill();
+            }
+            bCtx.restore();
+          }
+
+          burstPool.length = writeIdx;
+          if (burstPool.length > 0) {
+            burstRaf = requestAnimationFrame(renderBurst);
+          } else {
+            bCtx.clearRect(0, 0, w, h);
+            burstRaf = null;
+          }
+        }
+        burstRaf = requestAnimationFrame(renderBurst);
+      }
+
+      function spawnBloomAt(originX, originY, count, spread) {
+        if (prefersReduced || !bCtx) return;
+        const flowerColors = ['#F59E0B', '#FB7185', '#FBBF24', '#F43F5E', '#D97706'];
+        const petalColors = ['#F59E0B', '#FB7185', '#FBBF24', '#FDA4AF', '#FFFBEB'];
+        const leafColors = ['#10B981', '#34D399', '#059669'];
+        const goldColors = ['#F59E0B', '#FDE68A', '#D4AF37', '#FB7185'];
+
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.45;
+          const speed = 1.6 + Math.random() * spread;
+          let kind = 'petal';
+          if (i % 6 === 0) kind = 'flower';
+          else if (i % 7 === 0) kind = 'leaf';
+          else if (i % 3 === 0) kind = 'dust';
+
+          const color =
+            kind === 'flower'
+              ? flowerColors[i % flowerColors.length]
+              : kind === 'leaf'
+                ? leafColors[i % leafColors.length]
+                : kind === 'dust'
+                  ? goldColors[i % goldColors.length]
+                  : petalColors[i % petalColors.length];
+
+          burstPool.push({
+            x: originX + (Math.random() - 0.5) * 10,
+            y: originY + (Math.random() - 0.5) * 10,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 1.5,
+            size: kind === 'flower' ? 6 + Math.random() * 4.5 : kind === 'dust' ? 1.5 + Math.random() * 2.2 : 4.5 + Math.random() * 5,
+            rot: Math.random() * Math.PI * 2,
+            vr: (Math.random() - 0.5) * 0.14,
+            swayPhase: Math.random() * Math.PI * 2,
+            swaySpeed: 0.06 + Math.random() * 0.06,
+            alpha: 0.96,
+            decay: kind === 'dust' ? 0.015 + Math.random() * 0.01 : 0.011 + Math.random() * 0.008,
+            kind,
+            color,
+            centerColor: color === '#F59E0B' || color === '#FBBF24' ? '#FFFBEB' : '#FDE68A',
+          });
+        }
+        if (burstPool.length > 180) burstPool.splice(0, burstPool.length - 180);
+        runBurstLoop();
+      }
+
+      function triggerBurst() {
+        spawnBloomAt(window.innerWidth / 2, window.innerHeight / 2, 34, 6.4);
+      }
+
+      window.addEventListener('resize', sizeBurstCanvas);
+      window.addEventListener(
+        'pointerdown',
+        (e) => {
+          if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+          spawnBloomAt(e.clientX, e.clientY, 20, 4.8);
+        },
+        { capture: true, passive: true }
+      );
+
+      // 3D Tilt (60fps Mouse + Mobile Orientation)
+      if (!prefersReduced) {
+        let tgtX = 0, tgtY = 0, curX = 0, curY = 0;
+        cardStage.addEventListener('pointermove', (e) => {
+          const rect = cardStage.getBoundingClientRect();
+          const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+          const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+          tgtX = Math.max(-4.5, Math.min(4.5, -ny * 4.5));
+          tgtY = Math.max(-4.5, Math.min(4.5, nx * 4.5));
+        });
+        cardStage.addEventListener('pointerleave', () => {
+          tgtX = 0;
+          tgtY = 0;
+        });
+        window.addEventListener('deviceorientation', (e) => {
+          if (e.gamma === null || e.beta === null) return;
+          tgtY = Math.max(-4.5, Math.min(4.5, (e.gamma / 30) * 4.5));
+          tgtX = Math.max(-4.5, Math.min(4.5, ((e.beta - 45) / 30) * -4.5));
+        }, { passive: true });
+        function tiltLoop() {
+          curX += (tgtX - curX) * 0.14;
+          curY += (tgtY - curY) * 0.14;
+          cardTilt.style.transform = `rotateX(${curX.toFixed(2)}deg) rotateY(${curY.toFixed(2)}deg)`;
+          requestAnimationFrame(tiltLoop);
+        }
+        requestAnimationFrame(tiltLoop);
+      }
+
+      function openCard() {
+        if (!flipper.classList.contains('is-flipped')) {
+          flipper.classList.add('is-flipped');
+          triggerBurst();
+        }
+        if (!musicPlaying) startMusic();
+      }
+
+      function closeCard() {
+        flipper.classList.remove('is-flipped');
+      }
+
+      cardFront.addEventListener('click', openCard);
+      cardFront.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openCard();
+        }
+      });
+      btnOpen.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCard();
+      });
+      btnFlipFront.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeCard();
+      });
+
+      // Slow Gently Falling Gold Dust Particles
+      const canvas = document.getElementById('gold-dust-canvas');
+      const ctx = canvas.getContext('2d');
+      if (!prefersReduced && ctx) {
+        let w = (canvas.width = window.innerWidth);
+        let h = (canvas.height = window.innerHeight);
+
+        window.addEventListener('resize', () => {
+          w = canvas.width = window.innerWidth;
+          h = canvas.height = window.innerHeight;
+        });
+
+        const colors = ['#F59E0B', '#FBBF24', '#FB7185', '#D97706'];
+        const count = Math.min(44, Math.max(22, Math.floor(w / 36)));
+        const motes = Array.from({ length: count }, (_, i) => ({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: 1.1 + Math.random() * 2.1,
+          vy: 0.22 + Math.random() * 0.4,
+          vx: (Math.random() - 0.5) * 0.24,
+          phase: Math.random() * Math.PI * 2,
+          vphase: 0.018 + Math.random() * 0.025,
+          opacity: 0.35 + Math.random() * 0.45,
+          color: colors[i % colors.length],
+        }));
+
+        function tick() {
+          ctx.clearRect(0, 0, w, h);
+          for (const m of motes) {
+            m.y += m.vy;
+            m.x += m.vx + Math.sin(m.y * 0.01) * 0.16;
+            m.phase += m.vphase;
+            if (m.y > h + 16) {
+              m.y = -12;
+              m.x = Math.random() * w;
+            }
+            if (m.x > w + 16) m.x = -12;
+            if (m.x < -16) m.x = w + 12;
+
+            const alpha = m.opacity * (0.55 + 0.45 * Math.sin(m.phase));
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = m.color;
+            ctx.shadowColor = '#F59E0B';
+            ctx.shadowBlur = m.r * 3;
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+    </script>
+  </body>
+</html>
