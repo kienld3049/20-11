@@ -1,5 +1,7 @@
 import { MusicTheme } from '../types/card';
 
+type InstrumentKind = 'piano' | 'flute' | 'strings' | 'celesta';
+
 interface ScheduledNote {
   midi: number;
   offsetBeats: number;
@@ -21,597 +23,856 @@ interface ScoreArrangement {
   measures: MeasureEvent[];
 }
 
-function midiToFreq(midi: number): number {
-  return 440 * Math.pow(2, (midi - 69) / 12);
-}
+const SAMPLE_BANK: Record<InstrumentKind, { folder: string; cdn: string; notes: { name: string; midi: number }[] }> = {
+  piano: {
+    folder: '/samples/piano',
+    cdn: 'https://gleitz.github.io/midi-js-soundfonts/MusyngKite/acoustic_grand_piano-mp3',
+    notes: [
+      { name: 'C2', midi: 36 },
+      { name: 'Eb2', midi: 39 },
+      { name: 'Gb2', midi: 42 },
+      { name: 'A2', midi: 45 },
+      { name: 'C3', midi: 48 },
+      { name: 'Eb3', midi: 51 },
+      { name: 'Gb3', midi: 54 },
+      { name: 'A3', midi: 57 },
+      { name: 'C4', midi: 60 },
+      { name: 'Eb4', midi: 63 },
+      { name: 'Gb4', midi: 66 },
+      { name: 'A4', midi: 69 },
+      { name: 'C5', midi: 72 },
+      { name: 'Eb5', midi: 75 },
+      { name: 'Gb5', midi: 78 },
+      { name: 'A5', midi: 81 },
+      { name: 'C6', midi: 84 },
+    ],
+  },
+  flute: {
+    folder: '/samples/flute',
+    cdn: 'https://gleitz.github.io/midi-js-soundfonts/MusyngKite/flute-mp3',
+    notes: [
+      { name: 'C4', midi: 60 },
+      { name: 'Eb4', midi: 63 },
+      { name: 'Gb4', midi: 66 },
+      { name: 'A4', midi: 69 },
+      { name: 'C5', midi: 72 },
+      { name: 'Eb5', midi: 75 },
+      { name: 'Gb5', midi: 78 },
+      { name: 'A5', midi: 81 },
+      { name: 'C6', midi: 84 },
+    ],
+  },
+  strings: {
+    folder: '/samples/strings',
+    cdn: 'https://gleitz.github.io/midi-js-soundfonts/MusyngKite/string_ensemble_1-mp3',
+    notes: [
+      { name: 'C3', midi: 48 },
+      { name: 'Eb3', midi: 51 },
+      { name: 'Gb3', midi: 54 },
+      { name: 'A3', midi: 57 },
+      { name: 'C4', midi: 60 },
+      { name: 'Eb4', midi: 63 },
+      { name: 'Gb4', midi: 66 },
+      { name: 'A4', midi: 69 },
+      { name: 'C5', midi: 72 },
+    ],
+  },
+  celesta: {
+    folder: '/samples/celesta',
+    cdn: 'https://gleitz.github.io/midi-js-soundfonts/MusyngKite/celesta-mp3',
+    notes: [
+      { name: 'C4', midi: 60 },
+      { name: 'Eb4', midi: 63 },
+      { name: 'Gb4', midi: 66 },
+      { name: 'A4', midi: 69 },
+      { name: 'C5', midi: 72 },
+      { name: 'Eb5', midi: 75 },
+      { name: 'Gb5', midi: 78 },
+      { name: 'A5', midi: 81 },
+    ],
+  },
+};
 
-// Flowing 4-note broken chord arpeggio across 2 beats
-function arp2(notes: [number, number, number, number]): ScheduledNote[] {
+// Gentle 4/4 piano arpeggio across 4 beats
+function arp4(bass: number, c1: number, c2: number, c3: number): ScheduledNote[] {
   return [
-    { midi: notes[0], offsetBeats: 0, beats: 1.9, velocity: 0.42 },
-    { midi: notes[1], offsetBeats: 0.5, beats: 1.4, velocity: 0.31 },
-    { midi: notes[2], offsetBeats: 1.0, beats: 1.0, velocity: 0.35 },
-    { midi: notes[3], offsetBeats: 1.5, beats: 0.9, velocity: 0.29 },
+    { midi: bass, offsetBeats: 0, beats: 3.8, velocity: 0.54 },
+    { midi: c1, offsetBeats: 0.5, beats: 1.6, velocity: 0.34 },
+    { midi: c2, offsetBeats: 1.0, beats: 1.5, velocity: 0.38 },
+    { midi: c3, offsetBeats: 1.5, beats: 1.4, velocity: 0.34 },
+    { midi: c1, offsetBeats: 2.0, beats: 1.8, velocity: 0.36 },
+    { midi: c2, offsetBeats: 2.5, beats: 1.4, velocity: 0.33 },
+    { midi: c3, offsetBeats: 3.0, beats: 1.1, velocity: 0.36 },
+    { midi: c2, offsetBeats: 3.5, beats: 0.9, velocity: 0.31 },
   ];
 }
 
-// Gentle 3/4 waltz piano accompaniment across 3 beats (Bass - Chord - Chord)
+// Gentle 3/4 waltz piano accompaniment across 3 beats
 function waltz3(bass: number, chord: [number, number, number]): ScheduledNote[] {
   return [
-    { midi: bass, offsetBeats: 0, beats: 2.8, velocity: 0.46 },
-    { midi: chord[0], offsetBeats: 1, beats: 1.15, velocity: 0.24 },
-    { midi: chord[1], offsetBeats: 1.02, beats: 1.15, velocity: 0.23 },
-    { midi: chord[2], offsetBeats: 1.04, beats: 1.15, velocity: 0.23 },
-    { midi: chord[0], offsetBeats: 2, beats: 1.0, velocity: 0.2 },
-    { midi: chord[1], offsetBeats: 2.02, beats: 1.0, velocity: 0.19 },
-    { midi: chord[2], offsetBeats: 2.04, beats: 1.0, velocity: 0.19 },
+    { midi: bass, offsetBeats: 0, beats: 2.8, velocity: 0.56 },
+    { midi: chord[0], offsetBeats: 1, beats: 1.15, velocity: 0.32 },
+    { midi: chord[1], offsetBeats: 1.02, beats: 1.15, velocity: 0.3 },
+    { midi: chord[2], offsetBeats: 1.04, beats: 1.15, velocity: 0.3 },
+    { midi: chord[0], offsetBeats: 2, beats: 1.0, velocity: 0.28 },
+    { midi: chord[1], offsetBeats: 2.02, beats: 1.0, velocity: 0.26 },
+    { midi: chord[2], offsetBeats: 2.04, beats: 1.0, velocity: 0.26 },
   ];
 }
 
-// ==================== 1. BỤI PHẤN — Không lời (Vũ Hoàng, C Major, 3/4 Piano & Sáo Trúc) ====================
+// ==================== 1. BỤI PHẤN (Vũ Hoàng - Key of F Major, 3/4) ====================
 const BUI_PHAN_SCORE: ScoreArrangement = {
-  bpm: 92,
+  bpm: 88,
   measures: [
-    // Intro bar (gentle C major waltz roll)
+    // Intro F
     {
       totalBeats: 3,
-      melody: [{ midi: 76, offsetBeats: 2, beats: 0.9, velocity: 0.58 }],
-      arpeggio: waltz3(48, [55, 60, 64]),
-      pad: [{ midi: 48, offsetBeats: 0, beats: 3.1, velocity: 0.2 }],
+      melody: [],
+      arpeggio: waltz3(41, [53, 57, 60]),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 3.1, velocity: 0.28 }],
     },
-    // "Khi thầy viết bảng, bụi phấn rơi rơi"
+    // "Khi thầy viết"
     {
       totalBeats: 3,
       flute: true,
       melody: [
-        { midi: 67, offsetBeats: 0, beats: 1.4, velocity: 0.74 }, // G4
-        { midi: 69, offsetBeats: 1.5, beats: 0.55, velocity: 0.72 }, // A4
-        { midi: 67, offsetBeats: 2.0, beats: 1.05, velocity: 0.74 }, // G4
-      ],
-      arpeggio: waltz3(48, [55, 60, 64]),
-      pad: [{ midi: 48, offsetBeats: 0, beats: 3.1, velocity: 0.24 }],
-    },
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 64, offsetBeats: 0, beats: 1.4, velocity: 0.74 }, // E4
-        { midi: 67, offsetBeats: 1.5, beats: 0.55, velocity: 0.7 }, // G4
-        { midi: 62, offsetBeats: 2.0, beats: 1.05, velocity: 0.72 }, // D4
-      ],
-      arpeggio: waltz3(45, [52, 57, 60]),
-    },
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [{ midi: 60, offsetBeats: 0, beats: 2.7, velocity: 0.76 }], // C4
-      arpeggio: waltz3(48, [55, 60, 64]),
-      pad: [{ midi: 48, offsetBeats: 0, beats: 3.1, velocity: 0.22 }],
-    },
-    // "Có hạt bụi nào rơi trên bục giảng"
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 62, offsetBeats: 0, beats: 1.4, velocity: 0.74 }, // D4
-        { midi: 64, offsetBeats: 1.5, beats: 0.55, velocity: 0.72 }, // E4
-        { midi: 67, offsetBeats: 2.0, beats: 1.05, velocity: 0.78 }, // G4
+        { midi: 72, offsetBeats: 0, beats: 1.5, velocity: 0.8 }, // C5 - Khi
+        { midi: 69, offsetBeats: 1.5, beats: 0.5, velocity: 0.75 }, // A4 - thầy
+        { midi: 72, offsetBeats: 2.0, beats: 1.0, velocity: 0.8 }, // C5 - viết
       ],
       arpeggio: waltz3(41, [53, 57, 60]),
-      pad: [{ midi: 41, offsetBeats: 0, beats: 3.1, velocity: 0.24 }],
+      pad: [{ midi: 53, offsetBeats: 0, beats: 3.1, velocity: 0.3 }],
     },
+    // "bảng, bụi phấn"
     {
       totalBeats: 3,
       flute: true,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 1.4, velocity: 0.78 }, // A4
-        { midi: 72, offsetBeats: 1.5, beats: 0.55, velocity: 0.8 }, // C5
-        { midi: 69, offsetBeats: 2.0, beats: 1.05, velocity: 0.74 }, // A4
-      ],
-      arpeggio: waltz3(48, [55, 60, 64]),
-    },
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 67, offsetBeats: 0, beats: 1.6, velocity: 0.76 }, // G4
-        { midi: 64, offsetBeats: 2.0, beats: 1.1, velocity: 0.7 }, // E4
-      ],
-      arpeggio: waltz3(48, [55, 60, 64]),
-    },
-    // "Có hạt bụi nào vương trên tóc thầy"
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 62, offsetBeats: 0, beats: 1.4, velocity: 0.74 }, // D4
-        { midi: 64, offsetBeats: 1.5, beats: 0.55, velocity: 0.74 }, // E4
-        { midi: 67, offsetBeats: 2.0, beats: 1.05, velocity: 0.78 }, // G4
+        { midi: 74, offsetBeats: 0, beats: 1.0, velocity: 0.82 }, // D5 - bảng
+        { midi: 65, offsetBeats: 1.0, beats: 1.0, velocity: 0.74 }, // F4 - bụi
+        { midi: 72, offsetBeats: 2.0, beats: 1.0, velocity: 0.8 }, // C5 - phấn
       ],
       arpeggio: waltz3(50, [53, 57, 62]),
-      pad: [{ midi: 50, offsetBeats: 0, beats: 3.1, velocity: 0.24 }],
     },
+    // "rơi rơi"
     {
       totalBeats: 3,
       flute: true,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 1.4, velocity: 0.78 }, // A4
-        { midi: 71, offsetBeats: 1.5, beats: 0.55, velocity: 0.78 }, // B4
-        { midi: 72, offsetBeats: 2.0, beats: 1.05, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 72, offsetBeats: 0.5, beats: 1.5, velocity: 0.78 }, // C5 - rơi
+        { midi: 72, offsetBeats: 2.0, beats: 1.0, velocity: 0.76 }, // C5 - rơi
       ],
-      arpeggio: waltz3(43, [50, 55, 59]),
-    },
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [{ midi: 74, offsetBeats: 0, beats: 2.7, velocity: 0.8 }], // D5
-      arpeggio: waltz3(43, [50, 55, 59]),
-      pad: [{ midi: 43, offsetBeats: 0, beats: 3.1, velocity: 0.24 }],
-    },
-    // Chorus: "Em yêu phút giây này, thầy em tóc như bạc thêm"
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 72, offsetBeats: 0, beats: 1.0, velocity: 0.82 }, // C5
-        { midi: 74, offsetBeats: 1.0, beats: 1.0, velocity: 0.82 }, // D5
-        { midi: 76, offsetBeats: 2.0, beats: 1.0, velocity: 0.85 }, // E5
-      ],
-      arpeggio: waltz3(48, [55, 60, 64]),
+      arpeggio: waltz3(48, [52, 55, 60]),
       pad: [{ midi: 48, offsetBeats: 0, beats: 3.1, velocity: 0.28 }],
     },
+    // "Có hạt bụi nào"
     {
       totalBeats: 3,
       flute: true,
       melody: [
-        { midi: 74, offsetBeats: 0, beats: 1.4, velocity: 0.8 }, // D5
-        { midi: 72, offsetBeats: 1.5, beats: 1.5, velocity: 0.78 }, // C5
+        { midi: 70, offsetBeats: 0, beats: 1.0, velocity: 0.8 }, // Bb4 - Có
+        { midi: 67, offsetBeats: 1.0, beats: 0.5, velocity: 0.75 }, // G4 - hạt
+        { midi: 65, offsetBeats: 1.5, beats: 0.5, velocity: 0.74 }, // F4 - bụi
+        { midi: 67, offsetBeats: 2.0, beats: 1.0, velocity: 0.78 }, // G4 - nào
+      ],
+      arpeggio: waltz3(46, [53, 58, 62]),
+      pad: [{ midi: 58, offsetBeats: 0, beats: 3.1, velocity: 0.28 }],
+    },
+    // "rơi trên bục giảng"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 70, offsetBeats: 0, beats: 1.0, velocity: 0.78 }, // Bb4 - rơi
+        { midi: 70, offsetBeats: 1.0, beats: 0.5, velocity: 0.76 }, // Bb4 - trên
+        { midi: 72, offsetBeats: 1.5, beats: 0.5, velocity: 0.8 }, // C5 - bục
+        { midi: 74, offsetBeats: 2.0, beats: 1.2, velocity: 0.82 }, // D5 - giảng
+      ],
+      arpeggio: waltz3(43, [55, 58, 62]),
+    },
+    // "Có hạt bụi nào"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 67, offsetBeats: 0, beats: 0.5, velocity: 0.75 }, // G4 - Có
+        { midi: 69, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // A4 - hạt
+        { midi: 64, offsetBeats: 1.0, beats: 1.0, velocity: 0.74 }, // E4 - bụi
+        { midi: 62, offsetBeats: 2.0, beats: 0.5, velocity: 0.72 }, // D4
+        { midi: 64, offsetBeats: 2.5, beats: 0.6, velocity: 0.74 }, // E4 - nào
+      ],
+      arpeggio: waltz3(48, [52, 55, 58]),
+      pad: [{ midi: 48, offsetBeats: 0, beats: 3.1, velocity: 0.28 }],
+    },
+    // "vương trên tóc"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 64, offsetBeats: 0, beats: 1.0, velocity: 0.76 }, // E4
+        { midi: 65, offsetBeats: 1.0, beats: 0.5, velocity: 0.78 }, // F4 - vương
+        { midi: 67, offsetBeats: 1.5, beats: 0.5, velocity: 0.8 }, // G4 - trên
+        { midi: 67, offsetBeats: 2.0, beats: 0.5, velocity: 0.78 }, // G4 - tóc
+        { midi: 65, offsetBeats: 2.5, beats: 0.5, velocity: 0.76 }, // F4
+      ],
+      arpeggio: waltz3(41, [53, 57, 60]),
+    },
+    // "thầy..."
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 67, offsetBeats: 0, beats: 0.5, velocity: 0.78 },
+        { midi: 69, offsetBeats: 0.5, beats: 1.5, velocity: 0.82 }, // A4 - thầy
+        { midi: 65, offsetBeats: 2.0, beats: 1.1, velocity: 0.76 }, // F4
+      ],
+      arpeggio: waltz3(41, [53, 57, 60]),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 3.1, velocity: 0.28 }],
+    },
+    // Điệp khúc: "Em yêu phút"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 77, offsetBeats: 0, beats: 1.0, velocity: 0.85 }, // F5 - Em
+        { midi: 77, offsetBeats: 1.0, beats: 1.0, velocity: 0.85 }, // F5 - yêu
+        { midi: 79, offsetBeats: 2.0, beats: 1.0, velocity: 0.88 }, // G5 - phút
+      ],
+      arpeggio: waltz3(46, [53, 58, 62]),
+      pad: [{ midi: 58, offsetBeats: 0, beats: 3.1, velocity: 0.34 }],
+    },
+    // "giây này"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 77, offsetBeats: 0, beats: 1.0, velocity: 0.84 }, // F5 - giây
+        { midi: 74, offsetBeats: 1.0, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 72, offsetBeats: 1.5, beats: 1.5, velocity: 0.8 }, // C5 - này
+      ],
+      arpeggio: waltz3(41, [53, 57, 60]),
+    },
+    // "thầy em tóc như"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 67, offsetBeats: 0, beats: 0.5, velocity: 0.76 }, // G4 - thầy
+        { midi: 69, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // A4 - em
+        { midi: 74, offsetBeats: 1.0, beats: 1.0, velocity: 0.82 }, // D5 - tóc
+        { midi: 77, offsetBeats: 2.0, beats: 1.0, velocity: 0.84 }, // F5 - như
+      ],
+      arpeggio: waltz3(50, [53, 57, 62]),
+      pad: [{ midi: 50, offsetBeats: 0, beats: 3.1, velocity: 0.3 }],
+    },
+    // "bạc thêm"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 76, offsetBeats: 0, beats: 1.0, velocity: 0.82 }, // E5 - bạc
+        { midi: 74, offsetBeats: 1.0, beats: 0.5, velocity: 0.78 }, // D5
+        { midi: 76, offsetBeats: 1.5, beats: 1.5, velocity: 0.82 }, // E5 - thêm
+      ],
+      arpeggio: waltz3(48, [52, 55, 60]),
+    },
+    // "Bạc thêm vì bụi"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 69, offsetBeats: 0, beats: 1.0, velocity: 0.8 }, // A4 - Bạc
+        { midi: 72, offsetBeats: 1.0, beats: 1.0, velocity: 0.82 }, // C5 - thêm
+        { midi: 65, offsetBeats: 2.0, beats: 0.5, velocity: 0.76 }, // F4 - vì
+        { midi: 65, offsetBeats: 2.5, beats: 0.5, velocity: 0.76 }, // F4 - bụi
       ],
       arpeggio: waltz3(45, [52, 57, 60]),
+      pad: [{ midi: 57, offsetBeats: 0, beats: 3.1, velocity: 0.3 }],
     },
+    // "phấn, để cho em"
     {
       totalBeats: 3,
       flute: true,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 1.0, velocity: 0.76 }, // A4
-        { midi: 72, offsetBeats: 1.0, beats: 1.0, velocity: 0.8 }, // C5
-        { midi: 74, offsetBeats: 2.0, beats: 1.0, velocity: 0.8 }, // D5
+        { midi: 67, offsetBeats: 0, beats: 1.0, velocity: 0.78 }, // G4 - phấn
+        { midi: 69, offsetBeats: 1.0, beats: 1.0, velocity: 0.8 }, // A4 - để
+        { midi: 67, offsetBeats: 2.0, beats: 0.5, velocity: 0.76 }, // G4 - cho
+        { midi: 67, offsetBeats: 2.5, beats: 0.5, velocity: 0.76 }, // G4 - em
+      ],
+      arpeggio: waltz3(43, [55, 58, 62]),
+    },
+    // "bài học hay"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 65, offsetBeats: 0, beats: 1.0, velocity: 0.78 }, // F4 - bài
+        { midi: 67, offsetBeats: 1.0, beats: 1.0, velocity: 0.8 }, // G4 - học
+        { midi: 72, offsetBeats: 2.0, beats: 1.4, velocity: 0.84 }, // C5 - hay
+      ],
+      arpeggio: waltz3(48, [52, 55, 58]),
+    },
+    // "Mai sau lớn nên"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 77, offsetBeats: 0, beats: 1.0, velocity: 0.85 }, // F5
+        { midi: 77, offsetBeats: 1.0, beats: 1.0, velocity: 0.85 }, // F5
+        { midi: 79, offsetBeats: 2.0, beats: 1.0, velocity: 0.88 }, // G5
+      ],
+      arpeggio: waltz3(46, [53, 58, 62]),
+      pad: [{ midi: 58, offsetBeats: 0, beats: 3.1, velocity: 0.34 }],
+    },
+    // "người"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 77, offsetBeats: 0, beats: 1.0, velocity: 0.84 }, // F5
+        { midi: 74, offsetBeats: 1.0, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 72, offsetBeats: 1.5, beats: 1.5, velocity: 0.8 }, // C5
       ],
       arpeggio: waltz3(41, [53, 57, 60]),
-      pad: [{ midi: 41, offsetBeats: 0, beats: 3.1, velocity: 0.26 }],
     },
+    // "Làm sao có thể nào"
     {
       totalBeats: 3,
       flute: true,
       melody: [
-        { midi: 72, offsetBeats: 0, beats: 1.4, velocity: 0.78 }, // C5
-        { midi: 69, offsetBeats: 1.5, beats: 0.6, velocity: 0.74 }, // A4
-        { midi: 67, offsetBeats: 2.0, beats: 1.0, velocity: 0.74 }, // G4
-      ],
-      arpeggio: waltz3(48, [55, 60, 64]),
-    },
-    // "Bạc thêm vì bụi phấn, để cho em bài học hay"
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 69, offsetBeats: 0, beats: 1.0, velocity: 0.78 }, // A4
-        { midi: 72, offsetBeats: 1.0, beats: 1.0, velocity: 0.8 }, // C5
-        { midi: 74, offsetBeats: 2.0, beats: 1.0, velocity: 0.8 }, // D5
-      ],
-      arpeggio: waltz3(41, [53, 57, 60]),
-    },
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 72, offsetBeats: 0, beats: 1.4, velocity: 0.78 }, // C5
-        { midi: 69, offsetBeats: 1.5, beats: 1.5, velocity: 0.74 }, // A4
-      ],
-      arpeggio: waltz3(43, [50, 55, 59]),
-    },
-    {
-      totalBeats: 3,
-      flute: true,
-      melody: [
-        { midi: 64, offsetBeats: 0, beats: 1.0, velocity: 0.74 }, // E4
-        { midi: 67, offsetBeats: 1.0, beats: 1.0, velocity: 0.76 }, // G4
-        { midi: 69, offsetBeats: 2.0, beats: 1.0, velocity: 0.78 }, // A4
+        { midi: 67, offsetBeats: 0, beats: 0.5, velocity: 0.76 }, // G4
+        { midi: 69, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // A4
+        { midi: 74, offsetBeats: 1.0, beats: 1.0, velocity: 0.82 }, // D5
+        { midi: 77, offsetBeats: 2.0, beats: 1.0, velocity: 0.84 }, // F5
       ],
       arpeggio: waltz3(50, [53, 57, 62]),
     },
+    // "quên"
     {
       totalBeats: 3,
       flute: true,
       melody: [
-        { midi: 67, offsetBeats: 0, beats: 1.4, velocity: 0.76 }, // G4
-        { midi: 62, offsetBeats: 1.5, beats: 1.5, velocity: 0.72 }, // D4
+        { midi: 76, offsetBeats: 0, beats: 1.0, velocity: 0.82 }, // E5
+        { midi: 74, offsetBeats: 1.0, beats: 0.5, velocity: 0.78 }, // D5
+        { midi: 76, offsetBeats: 1.5, beats: 1.5, velocity: 0.82 }, // E5
       ],
-      arpeggio: waltz3(43, [50, 55, 59]),
+      arpeggio: waltz3(48, [52, 55, 60]),
     },
+    // "Ngày xưa thầy dạy dỗ"
     {
       totalBeats: 3,
       flute: true,
-      melody: [{ midi: 72, offsetBeats: 0, beats: 3.2, velocity: 0.82 }], // C5
+      melody: [
+        { midi: 69, offsetBeats: 0, beats: 1.0, velocity: 0.8 }, // A4
+        { midi: 72, offsetBeats: 1.0, beats: 1.0, velocity: 0.82 }, // C5
+        { midi: 65, offsetBeats: 2.0, beats: 0.5, velocity: 0.76 }, // F4
+        { midi: 67, offsetBeats: 2.5, beats: 0.5, velocity: 0.78 }, // G4
+      ],
+      arpeggio: waltz3(46, [53, 58, 62]),
+    },
+    // "Khi em tuổi còn"
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [
+        { midi: 69, offsetBeats: 0, beats: 1.0, velocity: 0.8 }, // A4
+        { midi: 67, offsetBeats: 1.0, beats: 0.5, velocity: 0.76 }, // G4
+        { midi: 67, offsetBeats: 1.5, beats: 0.5, velocity: 0.76 }, // G4
+        { midi: 62, offsetBeats: 2.0, beats: 0.5, velocity: 0.74 }, // D4
+        { midi: 64, offsetBeats: 2.5, beats: 0.5, velocity: 0.76 }, // E4
+      ],
+      arpeggio: waltz3(48, [52, 55, 58]),
+    },
+    // "thơ..."
+    {
+      totalBeats: 3,
+      flute: true,
+      melody: [{ midi: 65, offsetBeats: 0, beats: 3.1, velocity: 0.84 }], // F4
       arpeggio: [
-        { midi: 48, offsetBeats: 0, beats: 3.2, velocity: 0.45 },
-        { midi: 55, offsetBeats: 0.08, beats: 3.1, velocity: 0.3 },
-        { midi: 60, offsetBeats: 0.16, beats: 3.0, velocity: 0.32 },
-        { midi: 64, offsetBeats: 0.24, beats: 2.9, velocity: 0.3 },
+        { midi: 41, offsetBeats: 0, beats: 3.1, velocity: 0.55 },
+        { midi: 53, offsetBeats: 0.1, beats: 3.0, velocity: 0.36 },
+        { midi: 57, offsetBeats: 0.2, beats: 2.9, velocity: 0.38 },
+        { midi: 60, offsetBeats: 0.3, beats: 2.8, velocity: 0.36 },
       ],
-      pad: [{ midi: 48, offsetBeats: 0, beats: 3.2, velocity: 0.26 }],
+      pad: [{ midi: 53, offsetBeats: 0, beats: 3.2, velocity: 0.32 }],
     },
   ],
 };
 
-// ==================== 2. NGƯỜI THẦY — Không lời (Nguyễn Nhất Huy, Am/C, 4/4 Ballad) ====================
+// ==================== 2. NGƯỜI THẦY (Nguyễn Nhất Huy - A Minor, 4/4) ====================
 const NGUOI_THAY_SCORE: ScoreArrangement = {
-  bpm: 68,
+  bpm: 72,
   measures: [
-    // "Người thầy vẫn lặng lẽ đi về sớm trưa"
+    // "Người thầy, vẫn lặng lẽ đi về sớm"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 64, offsetBeats: 0, beats: 0.55, velocity: 0.72 }, // E4
-        { midi: 69, offsetBeats: 0.5, beats: 0.6, velocity: 0.78 }, // A4
-        { midi: 71, offsetBeats: 1.0, beats: 0.55, velocity: 0.76 }, // B4
-        { midi: 72, offsetBeats: 1.5, beats: 0.6, velocity: 0.8 }, // C5
+        { midi: 69, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // A4
+        { midi: 69, offsetBeats: 0.5, beats: 0.9, velocity: 0.8 }, // A4
+        { midi: 72, offsetBeats: 1.5, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 69, offsetBeats: 2.0, beats: 0.5, velocity: 0.78 }, // A4
+        { midi: 72, offsetBeats: 2.5, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 71, offsetBeats: 3.0, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 67, offsetBeats: 3.5, beats: 0.5, velocity: 0.76 }, // G4
       ],
-      arpeggio: arp2([45, 52, 57, 60]), // Am
-      pad: [{ midi: 45, offsetBeats: 0, beats: 2.2, velocity: 0.25 }],
+      arpeggio: arp4(45, 52, 57, 60),
+      pad: [{ midi: 57, offsetBeats: 0, beats: 4.1, velocity: 0.3 }],
     },
+    // "trưa..."
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 71, offsetBeats: 0, beats: 0.55, velocity: 0.75 }, // B4
-        { midi: 69, offsetBeats: 0.5, beats: 0.55, velocity: 0.74 }, // A4
-        { midi: 67, offsetBeats: 1.0, beats: 0.55, velocity: 0.72 }, // G4
-        { midi: 69, offsetBeats: 1.5, beats: 1.1, velocity: 0.78 }, // A4
+        { midi: 71, offsetBeats: 0, beats: 0.75, velocity: 0.78 }, // B4
+        { midi: 69, offsetBeats: 0.75, beats: 2.7, velocity: 0.82 }, // A4
       ],
-      arpeggio: arp2([40, 47, 52, 55]), // Em
+      arpeggio: arp4(40, 47, 52, 57),
     },
-    // "Từng ngày giọt mồ hôi rơi nhòe trang giấy"
+    // "Từng ngày, giọt mồ hôi rơi nhòe trang"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 64, offsetBeats: 0, beats: 0.55, velocity: 0.72 }, // E4
-        { midi: 69, offsetBeats: 0.5, beats: 0.6, velocity: 0.76 }, // A4
-        { midi: 71, offsetBeats: 1.0, beats: 0.55, velocity: 0.76 }, // B4
-        { midi: 72, offsetBeats: 1.5, beats: 0.6, velocity: 0.8 }, // C5
+        { midi: 67, offsetBeats: 0, beats: 0.5, velocity: 0.76 }, // G4
+        { midi: 67, offsetBeats: 0.5, beats: 0.9, velocity: 0.78 }, // G4
+        { midi: 71, offsetBeats: 1.5, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 72, offsetBeats: 2.0, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 2.5, beats: 1.3, velocity: 0.84 }, // D5
       ],
-      arpeggio: arp2([41, 48, 53, 57]), // F
-      pad: [{ midi: 41, offsetBeats: 0, beats: 2.2, velocity: 0.24 }],
+      arpeggio: arp4(43, 50, 55, 59),
+      pad: [{ midi: 55, offsetBeats: 0, beats: 4.1, velocity: 0.28 }],
     },
+    // "giấy..."
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 71, offsetBeats: 0, beats: 0.55, velocity: 0.74 }, // B4
-        { midi: 69, offsetBeats: 0.5, beats: 0.55, velocity: 0.74 }, // A4
-        { midi: 67, offsetBeats: 1.0, beats: 1.1, velocity: 0.72 }, // G4
+        { midi: 74, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 72, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // C5
+        { midi: 74, offsetBeats: 1.0, beats: 0.5, velocity: 0.82 }, // D5
+        { midi: 76, offsetBeats: 1.5, beats: 2.3, velocity: 0.84 }, // E5
       ],
-      arpeggio: arp2([43, 50, 55, 59]), // G
+      arpeggio: arp4(48, 55, 60, 64),
     },
-    // Chorus: "Dù năm tháng vô tình trôi mãi mãi"
+    // "Để em đến, bến bờ ước mơ"
     {
-      totalBeats: 2,
+      totalBeats: 4,
+      melody: [
+        { midi: 74, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 76, offsetBeats: 0.5, beats: 0.5, velocity: 0.82 }, // E5
+        { midi: 77, offsetBeats: 1.0, beats: 0.7, velocity: 0.84 }, // F5
+        { midi: 76, offsetBeats: 1.75, beats: 0.5, velocity: 0.8 }, // E5
+        { midi: 74, offsetBeats: 2.25, beats: 0.5, velocity: 0.78 }, // D5
+        { midi: 79, offsetBeats: 2.75, beats: 0.5, velocity: 0.86 }, // G5
+        { midi: 77, offsetBeats: 3.25, beats: 0.9, velocity: 0.84 }, // F5
+      ],
+      arpeggio: arp4(50, 57, 62, 65),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 4.1, velocity: 0.3 }],
+    },
+    // "Rồi năm tháng sông dài gió mưa"
+    {
+      totalBeats: 4,
+      melody: [
+        { midi: 72, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // C5
+        { midi: 74, offsetBeats: 0.5, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 76, offsetBeats: 1.0, beats: 0.9, velocity: 0.82 }, // E5
+        { midi: 74, offsetBeats: 2.0, beats: 0.5, velocity: 0.78 }, // D5
+        { midi: 72, offsetBeats: 2.5, beats: 0.5, velocity: 0.76 }, // C5
+        { midi: 76, offsetBeats: 3.0, beats: 0.5, velocity: 0.8 }, // E5
+        { midi: 74, offsetBeats: 3.5, beats: 0.7, velocity: 0.78 }, // D5
+      ],
+      arpeggio: arp4(48, 55, 60, 64),
+    },
+    // "Cành hoa trắng, vẫn lung linh trong vườn"
+    {
+      totalBeats: 4,
+      melody: [
+        { midi: 69, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // A4
+        { midi: 71, offsetBeats: 0.5, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 72, offsetBeats: 1.0, beats: 0.9, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 2.0, beats: 0.5, velocity: 0.82 }, // D5
+        { midi: 72, offsetBeats: 2.5, beats: 0.5, velocity: 0.78 }, // C5
+        { midi: 71, offsetBeats: 3.0, beats: 0.5, velocity: 0.78 }, // B4
+        { midi: 69, offsetBeats: 3.5, beats: 0.5, velocity: 0.76 }, // A4
+      ],
+      arpeggio: arp4(45, 52, 57, 60),
+    },
+    // "xưa..."
+    {
+      totalBeats: 4,
+      melody: [{ midi: 71, offsetBeats: 0, beats: 3.6, velocity: 0.8 }], // B4
+      arpeggio: arp4(40, 47, 52, 56), // E
+      pad: [{ midi: 52, offsetBeats: 0, beats: 4.1, velocity: 0.3 }],
+    },
+    // Điệp khúc: "Dù năm tháng vô tình trôi mãi mãi"
+    {
+      totalBeats: 4,
       flute: true,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 0.55, velocity: 0.78 }, // A4
-        { midi: 72, offsetBeats: 0.5, beats: 0.55, velocity: 0.8 }, // C5
-        { midi: 74, offsetBeats: 1.0, beats: 0.55, velocity: 0.82 }, // D5
-        { midi: 76, offsetBeats: 1.5, beats: 0.7, velocity: 0.85 }, // E5
+        { midi: 69, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 71, offsetBeats: 0.5, beats: 0.5, velocity: 0.82 }, // B4
+        { midi: 72, offsetBeats: 1.0, beats: 0.75, velocity: 0.85 }, // C5
+        { midi: 71, offsetBeats: 1.75, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 69, offsetBeats: 2.25, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 71, offsetBeats: 2.75, beats: 0.5, velocity: 0.82 }, // B4
+        { midi: 72, offsetBeats: 3.25, beats: 0.8, velocity: 0.86 }, // C5
       ],
-      arpeggio: arp2([48, 55, 60, 64]), // C
-      pad: [{ midi: 48, offsetBeats: 0, beats: 2.2, velocity: 0.26 }],
+      arpeggio: arp4(45, 52, 57, 60),
+      pad: [{ midi: 57, offsetBeats: 0, beats: 4.1, velocity: 0.34 }],
     },
+    // "có hay bao mùa lá rơi"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       melody: [
-        { midi: 74, offsetBeats: 0, beats: 0.55, velocity: 0.8 }, // D5
-        { midi: 72, offsetBeats: 0.5, beats: 0.55, velocity: 0.76 }, // C5
-        { midi: 69, offsetBeats: 1.0, beats: 1.1, velocity: 0.76 }, // A4
+        { midi: 72, offsetBeats: 0, beats: 0.75, velocity: 0.84 }, // C5
+        { midi: 72, offsetBeats: 0.75, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 71, offsetBeats: 1.25, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 69, offsetBeats: 1.75, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 68, offsetBeats: 2.25, beats: 0.5, velocity: 0.78 }, // G#4
+        { midi: 71, offsetBeats: 2.75, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 69, offsetBeats: 3.25, beats: 1.0, velocity: 0.82 }, // A4
       ],
-      arpeggio: arp2([43, 50, 55, 59]), // G
+      arpeggio: arp4(40, 47, 52, 56),
     },
-    // "Thầy đã đi qua bao nhiêu chuyến đò... cho em thấy ánh mặt trời mai"
+    // "Thầy đã đến như muôn ngàn tia nắng"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 0.55, velocity: 0.76 }, // A4
-        { midi: 72, offsetBeats: 0.5, beats: 0.55, velocity: 0.78 }, // C5
-        { midi: 74, offsetBeats: 1.0, beats: 0.55, velocity: 0.82 }, // D5
-        { midi: 72, offsetBeats: 1.5, beats: 0.6, velocity: 0.76 }, // C5
+        { midi: 69, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 71, offsetBeats: 0.5, beats: 0.5, velocity: 0.82 }, // B4
+        { midi: 72, offsetBeats: 1.0, beats: 0.75, velocity: 0.85 }, // C5
+        { midi: 71, offsetBeats: 1.75, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 71, offsetBeats: 2.25, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 68, offsetBeats: 2.75, beats: 0.5, velocity: 0.78 }, // G#4
+        { midi: 69, offsetBeats: 3.25, beats: 0.8, velocity: 0.82 }, // A4
       ],
-      arpeggio: arp2([41, 48, 53, 57]), // F
-      pad: [{ midi: 41, offsetBeats: 0, beats: 2.2, velocity: 0.26 }],
+      arpeggio: arp4(45, 52, 57, 60),
     },
+    // "sáng soi bước em trong cuộc đời"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 0.55, velocity: 0.75 }, // A4
-        { midi: 67, offsetBeats: 0.5, beats: 0.55, velocity: 0.72 }, // G4
-        { midi: 64, offsetBeats: 1.0, beats: 0.55, velocity: 0.7 }, // E4
-        { midi: 69, offsetBeats: 1.5, beats: 1.8, velocity: 0.78 }, // A4
+        { midi: 71, offsetBeats: 0, beats: 0.5, velocity: 0.82 }, // B4
+        { midi: 72, offsetBeats: 0.5, beats: 0.5, velocity: 0.84 }, // C5
+        { midi: 71, offsetBeats: 1.0, beats: 0.5, velocity: 0.82 }, // B4
+        { midi: 72, offsetBeats: 1.5, beats: 0.5, velocity: 0.84 }, // C5
+        { midi: 71, offsetBeats: 2.0, beats: 0.5, velocity: 0.8 }, // B4
+        { midi: 69, offsetBeats: 2.5, beats: 0.5, velocity: 0.78 }, // A4
+        { midi: 65, offsetBeats: 3.0, beats: 1.1, velocity: 0.78 }, // F4
       ],
-      arpeggio: arp2([45, 52, 57, 60]), // Am
-      pad: [{ midi: 45, offsetBeats: 0, beats: 2.4, velocity: 0.26 }],
+      arpeggio: arp4(41, 48, 53, 57),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 4.1, velocity: 0.32 }],
+    },
+    // "Vẫn nhớ những khi trời mưa rơi"
+    {
+      totalBeats: 4,
+      flute: true,
+      melody: [
+        { midi: 65, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 65, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 65, offsetBeats: 1.0, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 64, offsetBeats: 1.5, beats: 0.5, velocity: 0.76 }, // E4
+        { midi: 62, offsetBeats: 2.0, beats: 0.5, velocity: 0.74 }, // D4
+        { midi: 64, offsetBeats: 2.5, beats: 1.4, velocity: 0.78 }, // E4
+      ],
+      arpeggio: arp4(50, 53, 57, 62),
+    },
+    // "vẫn chiếc áo xưa sờn đôi vai"
+    {
+      totalBeats: 4,
+      flute: true,
+      melody: [
+        { midi: 64, offsetBeats: 0, beats: 0.5, velocity: 0.76 }, // E4
+        { midi: 64, offsetBeats: 0.5, beats: 0.5, velocity: 0.76 }, // E4
+        { midi: 64, offsetBeats: 1.0, beats: 0.5, velocity: 0.76 }, // E4
+        { midi: 62, offsetBeats: 1.5, beats: 0.5, velocity: 0.74 }, // D4
+        { midi: 60, offsetBeats: 2.0, beats: 0.5, velocity: 0.72 }, // C4
+        { midi: 62, offsetBeats: 2.5, beats: 1.4, velocity: 0.76 }, // D4
+      ],
+      arpeggio: arp4(48, 55, 60, 64),
+    },
+    // "Thầy vẫn đi, buồn vui, lặng lẽ..."
+    {
+      totalBeats: 4,
+      flute: true,
+      melody: [
+        { midi: 62, offsetBeats: 0, beats: 0.5, velocity: 0.76 }, // D4
+        { midi: 67, offsetBeats: 0.5, beats: 0.5, velocity: 0.8 }, // G4
+        { midi: 65, offsetBeats: 1.0, beats: 0.8, velocity: 0.78 }, // F4
+        { midi: 64, offsetBeats: 2.0, beats: 0.5, velocity: 0.76 }, // E4
+        { midi: 69, offsetBeats: 2.5, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 68, offsetBeats: 3.0, beats: 0.5, velocity: 0.78 }, // G#4
+        { midi: 71, offsetBeats: 3.5, beats: 0.5, velocity: 0.8 }, // B4
+      ],
+      arpeggio: arp4(40, 47, 52, 56),
+    },
+    // Final resolve Am
+    {
+      totalBeats: 4,
+      flute: true,
+      melody: [{ midi: 69, offsetBeats: 0, beats: 3.6, velocity: 0.84 }],
+      arpeggio: arp4(45, 52, 57, 60),
+      pad: [{ midi: 57, offsetBeats: 0, beats: 4.1, velocity: 0.34 }],
     },
   ],
 };
 
-// ==================== 3. MONG ƯỚC KỶ NIỆM XƯA — Không lời (Xuân Phương, G Major, 4/4) ====================
+// ==================== 3. MONG ƯỚC KỶ NIỆM XƯA (Xuân Phương - F Major, 4/4) ====================
 const MONG_UOC_SCORE: ScoreArrangement = {
-  bpm: 74,
+  bpm: 76,
   measures: [
-    // "Thời gian trôi qua mau, chỉ còn lại những kỷ niệm"
+    // "Thời gian trôi qua mau"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 62, offsetBeats: 0, beats: 0.55, velocity: 0.72 }, // D4
-        { midi: 67, offsetBeats: 0.5, beats: 0.55, velocity: 0.76 }, // G4
-        { midi: 69, offsetBeats: 1.0, beats: 0.55, velocity: 0.76 }, // A4
-        { midi: 71, offsetBeats: 1.5, beats: 0.6, velocity: 0.78 }, // B4
+        { midi: 60, offsetBeats: 0, beats: 0.5, velocity: 0.74 }, // C4
+        { midi: 62, offsetBeats: 0.5, beats: 0.5, velocity: 0.76 }, // D4
+        { midi: 65, offsetBeats: 1.0, beats: 1.0, velocity: 0.8 }, // F4
+        { midi: 65, offsetBeats: 2.0, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 65, offsetBeats: 2.5, beats: 1.3, velocity: 0.8 }, // F4
       ],
-      arpeggio: arp2([43, 50, 55, 59]), // G
-      pad: [{ midi: 43, offsetBeats: 0, beats: 2.2, velocity: 0.22 }],
+      arpeggio: arp4(41, 48, 53, 57),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 4.1, velocity: 0.28 }],
     },
+    // "chỉ còn lại những kỷ niệm"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 0.85, velocity: 0.76 }, // A4
-        { midi: 67, offsetBeats: 0.75, beats: 0.45, velocity: 0.72 }, // G4
-        { midi: 64, offsetBeats: 1.25, beats: 0.85, velocity: 0.72 }, // E4
+        { midi: 69, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 67, offsetBeats: 0.5, beats: 0.5, velocity: 0.76 }, // G4
+        { midi: 69, offsetBeats: 1.0, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 72, offsetBeats: 1.5, beats: 0.9, velocity: 0.84 }, // C5
+        { midi: 67, offsetBeats: 2.5, beats: 0.5, velocity: 0.76 }, // G4
+        { midi: 65, offsetBeats: 3.0, beats: 1.1, velocity: 0.78 }, // F4
       ],
-      arpeggio: arp2([42, 50, 54, 57]), // D/F#
+      arpeggio: arp4(48, 55, 60, 64),
     },
-    // "Kỷ niệm thân yêu ơi, sẽ còn nhớ mãi tiếng thầy cô"
+    // "Kỷ niệm thân yêu ơi"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 62, offsetBeats: 0, beats: 0.55, velocity: 0.72 }, // D4
-        { midi: 67, offsetBeats: 0.5, beats: 0.55, velocity: 0.76 }, // G4
-        { midi: 69, offsetBeats: 1.0, beats: 0.55, velocity: 0.78 }, // A4
-        { midi: 71, offsetBeats: 1.5, beats: 0.6, velocity: 0.8 }, // B4
+        { midi: 65, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 65, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 74, offsetBeats: 1.0, beats: 1.0, velocity: 0.85 }, // D5
+        { midi: 74, offsetBeats: 2.0, beats: 0.5, velocity: 0.82 }, // D5
+        { midi: 74, offsetBeats: 2.5, beats: 1.2, velocity: 0.84 }, // D5
       ],
-      arpeggio: arp2([40, 47, 52, 55]), // Em
-      pad: [{ midi: 40, offsetBeats: 0, beats: 2.2, velocity: 0.22 }],
+      arpeggio: arp4(50, 57, 62, 65),
+      pad: [{ midi: 50, offsetBeats: 0, beats: 4.1, velocity: 0.28 }],
     },
+    // "sẽ còn nhớ mãi tiếng thầy cô"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 0.7, velocity: 0.76 }, // A4
-        { midi: 67, offsetBeats: 0.75, beats: 0.55, velocity: 0.74 }, // G4
-        { midi: 67, offsetBeats: 1.25, beats: 0.9, velocity: 0.74 }, // G4
+        { midi: 72, offsetBeats: 0, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 69, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // A4
+        { midi: 72, offsetBeats: 1.0, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 1.5, beats: 0.8, velocity: 0.84 }, // D5
+        { midi: 74, offsetBeats: 2.3, beats: 0.5, velocity: 0.82 }, // D5
+        { midi: 69, offsetBeats: 2.8, beats: 0.5, velocity: 0.78 }, // A4
+        { midi: 72, offsetBeats: 3.3, beats: 0.8, velocity: 0.8 }, // C5
       ],
-      arpeggio: arp2([47, 54, 59, 62]), // Bm
+      arpeggio: arp4(45, 52, 57, 60),
     },
-    // Chorus: "Nếu có ước muốn trong cuộc đời này"
+    // Điệp khúc: "Nếu có ước muốn trong cuộc đời này"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
       melody: [
-        { midi: 71, offsetBeats: 0, beats: 0.55, velocity: 0.78 }, // B4
-        { midi: 74, offsetBeats: 0.5, beats: 0.55, velocity: 0.8 }, // D5
-        { midi: 76, offsetBeats: 1.0, beats: 0.55, velocity: 0.84 }, // E5
-        { midi: 74, offsetBeats: 1.5, beats: 0.6, velocity: 0.78 }, // D5
+        { midi: 65, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 65, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // F4
+        { midi: 65, offsetBeats: 1.0, beats: 0.5, velocity: 0.8 }, // F4
+        { midi: 65, offsetBeats: 1.5, beats: 0.5, velocity: 0.8 }, // F4
+        { midi: 67, offsetBeats: 2.0, beats: 0.5, velocity: 0.82 }, // G4
+        { midi: 65, offsetBeats: 2.5, beats: 0.5, velocity: 0.8 }, // F4
+        { midi: 67, offsetBeats: 3.0, beats: 0.5, velocity: 0.82 }, // G4
+        { midi: 72, offsetBeats: 3.5, beats: 0.8, velocity: 0.86 }, // C5
       ],
-      arpeggio: arp2([48, 55, 60, 64]), // C
-      pad: [{ midi: 48, offsetBeats: 0, beats: 2.2, velocity: 0.25 }],
+      arpeggio: arp4(46, 53, 58, 62),
+      pad: [{ midi: 58, offsetBeats: 0, beats: 4.1, velocity: 0.32 }],
     },
+    // "Hãy nhớ ước muốn cho thời gian trở lại"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
       melody: [
-        { midi: 71, offsetBeats: 0, beats: 0.55, velocity: 0.76 }, // B4
-        { midi: 69, offsetBeats: 0.5, beats: 0.55, velocity: 0.74 }, // A4
-        { midi: 67, offsetBeats: 1.0, beats: 0.55, velocity: 0.74 }, // G4
-        { midi: 69, offsetBeats: 1.5, beats: 0.75, velocity: 0.76 }, // A4
+        { midi: 72, offsetBeats: 0, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 72, offsetBeats: 0.5, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 1.0, beats: 0.75, velocity: 0.85 }, // D5
+        { midi: 77, offsetBeats: 1.75, beats: 0.75, velocity: 0.88 }, // F5
+        { midi: 67, offsetBeats: 2.5, beats: 0.5, velocity: 0.78 }, // G4
+        { midi: 69, offsetBeats: 3.0, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 72, offsetBeats: 3.5, beats: 0.9, velocity: 0.84 }, // C5
       ],
-      arpeggio: arp2([43, 50, 55, 59]), // G
+      arpeggio: arp4(41, 48, 53, 57),
     },
-    // "Hãy nhớ ước muốn cho thời gian trở lại..."
+    // "Cho bao khát vọng, đam mê cháy bỏng"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
       melody: [
-        { midi: 71, offsetBeats: 0, beats: 0.55, velocity: 0.78 }, // B4
-        { midi: 74, offsetBeats: 0.5, beats: 0.55, velocity: 0.8 }, // D5
-        { midi: 76, offsetBeats: 1.0, beats: 0.55, velocity: 0.84 }, // E5
-        { midi: 74, offsetBeats: 1.5, beats: 0.6, velocity: 0.78 }, // D5
+        { midi: 67, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // G4
+        { midi: 69, offsetBeats: 0.5, beats: 0.5, velocity: 0.82 }, // A4
+        { midi: 70, offsetBeats: 1.0, beats: 0.75, velocity: 0.84 }, // Bb4
+        { midi: 69, offsetBeats: 1.75, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 67, offsetBeats: 2.25, beats: 0.5, velocity: 0.78 }, // G4
+        { midi: 65, offsetBeats: 2.75, beats: 0.5, velocity: 0.76 }, // F4
+        { midi: 64, offsetBeats: 3.25, beats: 0.9, velocity: 0.76 }, // E4
       ],
-      arpeggio: arp2([45, 52, 57, 60]), // Am
-      pad: [{ midi: 45, offsetBeats: 0, beats: 2.2, velocity: 0.24 }],
+      arpeggio: arp4(43, 50, 55, 58),
+      pad: [{ midi: 55, offsetBeats: 0, beats: 4.1, velocity: 0.3 }],
     },
+    // "Sẽ còn mãi trong tim mọi người..."
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
       melody: [
-        { midi: 71, offsetBeats: 0, beats: 0.55, velocity: 0.76 }, // B4
-        { midi: 69, offsetBeats: 0.5, beats: 0.55, velocity: 0.74 }, // A4
-        { midi: 67, offsetBeats: 1.0, beats: 1.6, velocity: 0.78 }, // G4
+        { midi: 60, offsetBeats: 0, beats: 0.5, velocity: 0.76 }, // C4
+        { midi: 62, offsetBeats: 0.5, beats: 0.5, velocity: 0.78 }, // D4
+        { midi: 65, offsetBeats: 1.0, beats: 0.5, velocity: 0.8 }, // F4
+        { midi: 69, offsetBeats: 1.5, beats: 0.5, velocity: 0.82 }, // A4
+        { midi: 67, offsetBeats: 2.0, beats: 0.5, velocity: 0.8 }, // G4
+        { midi: 65, offsetBeats: 2.5, beats: 1.6, velocity: 0.84 }, // F4
       ],
-      arpeggio: arp2([50, 57, 62, 66]), // D -> G
-      pad: [{ midi: 43, offsetBeats: 0, beats: 2.4, velocity: 0.25 }],
+      arpeggio: arp4(41, 48, 53, 57),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 4.1, velocity: 0.32 }],
     },
   ],
 };
 
-// ==================== 4. NHỚ ƠN THẦY CÔ — Không lời (F Major, 4/4 Celesta & Piano) ====================
+// ==================== 4. NHỚ ƠN THẦY CÔ (Nguyễn Ngọc Thiện - Am/C, 4/4) ====================
 const NHO_ON_THAY_CO_SCORE: ScoreArrangement = {
-  bpm: 78,
+  bpm: 84,
   measures: [
+    // "Về lại trường xưa với bao kỷ niệm"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       celesta: true,
       melody: [
-        { midi: 65, offsetBeats: 0, beats: 0.55, velocity: 0.74 }, // F4
-        { midi: 67, offsetBeats: 0.5, beats: 0.55, velocity: 0.74 }, // G4
-        { midi: 69, offsetBeats: 1.0, beats: 0.55, velocity: 0.78 }, // A4
-        { midi: 72, offsetBeats: 1.5, beats: 0.6, velocity: 0.8 }, // C5
+        { midi: 64, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // E4
+        { midi: 67, offsetBeats: 0.5, beats: 0.5, velocity: 0.8 }, // G4
+        { midi: 69, offsetBeats: 1.0, beats: 0.5, velocity: 0.82 }, // A4
+        { midi: 72, offsetBeats: 1.5, beats: 0.8, velocity: 0.84 }, // C5
+        { midi: 69, offsetBeats: 2.3, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 67, offsetBeats: 2.8, beats: 0.5, velocity: 0.78 }, // G4
+        { midi: 69, offsetBeats: 3.3, beats: 0.8, velocity: 0.8 }, // A4
       ],
-      arpeggio: arp2([41, 48, 53, 57]), // F
-      pad: [{ midi: 41, offsetBeats: 0, beats: 2.2, velocity: 0.22 }],
+      arpeggio: arp4(45, 52, 57, 60),
+      pad: [{ midi: 57, offsetBeats: 0, beats: 4.1, velocity: 0.28 }],
     },
+    // "Bóng dáng cô thầy vấn vương không rời"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       celesta: true,
       melody: [
-        { midi: 74, offsetBeats: 0, beats: 0.85, velocity: 0.82 }, // D5
-        { midi: 72, offsetBeats: 0.75, beats: 0.45, velocity: 0.76 }, // C5
-        { midi: 69, offsetBeats: 1.25, beats: 0.9, velocity: 0.75 }, // A4
+        { midi: 67, offsetBeats: 0, beats: 0.5, velocity: 0.78 }, // G4
+        { midi: 69, offsetBeats: 0.5, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 72, offsetBeats: 1.0, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 1.5, beats: 0.5, velocity: 0.84 }, // D5
+        { midi: 76, offsetBeats: 2.0, beats: 0.8, velocity: 0.86 }, // E5
+        { midi: 74, offsetBeats: 2.8, beats: 0.5, velocity: 0.82 }, // D5
+        { midi: 72, offsetBeats: 3.3, beats: 0.8, velocity: 0.8 }, // C5
       ],
-      arpeggio: arp2([38, 45, 50, 53]), // Dm
+      arpeggio: arp4(48, 55, 60, 64),
     },
+    // "Một thời tuổi thơ trôi theo cánh phượng"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       celesta: true,
       melody: [
-        { midi: 70, offsetBeats: 0, beats: 0.55, velocity: 0.76 }, // Bb4
-        { midi: 69, offsetBeats: 0.5, beats: 0.55, velocity: 0.74 }, // A4
-        { midi: 67, offsetBeats: 1.0, beats: 0.55, velocity: 0.72 }, // G4
-        { midi: 65, offsetBeats: 1.5, beats: 0.6, velocity: 0.72 }, // F4
+        { midi: 69, offsetBeats: 0, beats: 0.5, velocity: 0.8 }, // A4
+        { midi: 72, offsetBeats: 0.5, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 1.0, beats: 0.5, velocity: 0.84 }, // D5
+        { midi: 76, offsetBeats: 1.5, beats: 0.5, velocity: 0.86 }, // E5
+        { midi: 77, offsetBeats: 2.0, beats: 0.7, velocity: 0.88 }, // F5
+        { midi: 76, offsetBeats: 2.7, beats: 0.4, velocity: 0.82 }, // E5
+        { midi: 74, offsetBeats: 3.1, beats: 0.4, velocity: 0.8 }, // D5
+        { midi: 72, offsetBeats: 3.5, beats: 0.6, velocity: 0.8 }, // C5
       ],
-      arpeggio: arp2([46, 53, 58, 62]), // Bb
-      pad: [{ midi: 46, offsetBeats: 0, beats: 2.2, velocity: 0.22 }],
+      arpeggio: arp4(41, 48, 53, 57),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 4.1, velocity: 0.28 }],
     },
+    // "Lời thầy cô vọng mãi"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       celesta: true,
       melody: [
-        { midi: 67, offsetBeats: 0, beats: 1.1, velocity: 0.76 }, // G4
-        { midi: 64, offsetBeats: 1.0, beats: 1.1, velocity: 0.72 }, // E4
+        { midi: 72, offsetBeats: 0, beats: 0.5, velocity: 0.82 }, // C5
+        { midi: 74, offsetBeats: 0.5, beats: 0.5, velocity: 0.84 }, // D5
+        { midi: 69, offsetBeats: 1.0, beats: 0.8, velocity: 0.8 }, // A4
+        { midi: 67, offsetBeats: 2.0, beats: 0.6, velocity: 0.78 }, // G4
+        { midi: 69, offsetBeats: 2.6, beats: 1.4, velocity: 0.82 }, // A4
       ],
-      arpeggio: arp2([48, 55, 60, 64]), // C
+      arpeggio: arp4(43, 50, 55, 59),
     },
+    // "Bây giờ con về thăm ngôi trường xưa"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
       melody: [
-        { midi: 69, offsetBeats: 0, beats: 0.55, velocity: 0.78 }, // A4
-        { midi: 72, offsetBeats: 0.5, beats: 0.55, velocity: 0.8 }, // C5
-        { midi: 74, offsetBeats: 1.0, beats: 0.55, velocity: 0.82 }, // D5
-        { midi: 77, offsetBeats: 1.5, beats: 0.65, velocity: 0.84 }, // F5
+        { midi: 76, offsetBeats: 0, beats: 0.5, velocity: 0.84 }, // E5
+        { midi: 77, offsetBeats: 0.5, beats: 0.5, velocity: 0.85 }, // F5
+        { midi: 79, offsetBeats: 1.0, beats: 0.5, velocity: 0.88 }, // G5
+        { midi: 77, offsetBeats: 1.5, beats: 0.5, velocity: 0.84 }, // F5
+        { midi: 76, offsetBeats: 2.0, beats: 0.5, velocity: 0.82 }, // E5
+        { midi: 74, offsetBeats: 2.5, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 76, offsetBeats: 3.0, beats: 1.0, velocity: 0.84 }, // E5
       ],
-      arpeggio: arp2([41, 48, 53, 57]), // F
-      pad: [{ midi: 41, offsetBeats: 0, beats: 2.2, velocity: 0.24 }],
+      arpeggio: arp4(48, 55, 60, 64),
+      pad: [{ midi: 60, offsetBeats: 0, beats: 4.1, velocity: 0.32 }],
     },
+    // "Con tìm cô thầy sau bao nhiêu năm"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
       melody: [
-        { midi: 76, offsetBeats: 0, beats: 0.55, velocity: 0.82 }, // E5
-        { midi: 74, offsetBeats: 0.5, beats: 0.55, velocity: 0.78 }, // D5
-        { midi: 72, offsetBeats: 1.0, beats: 1.1, velocity: 0.78 }, // C5
+        { midi: 77, offsetBeats: 0, beats: 0.5, velocity: 0.84 }, // F5
+        { midi: 79, offsetBeats: 0.5, beats: 0.5, velocity: 0.86 }, // G5
+        { midi: 81, offsetBeats: 1.0, beats: 0.8, velocity: 0.88 }, // A5
+        { midi: 79, offsetBeats: 1.8, beats: 0.6, velocity: 0.84 }, // G5
+        { midi: 76, offsetBeats: 2.4, beats: 0.6, velocity: 0.82 }, // E5
+        { midi: 74, offsetBeats: 3.0, beats: 0.5, velocity: 0.8 }, // D5
+        { midi: 72, offsetBeats: 3.5, beats: 0.8, velocity: 0.8 }, // C5
       ],
-      arpeggio: arp2([48, 55, 60, 64]), // C
+      arpeggio: arp4(43, 50, 55, 59),
     },
+    // "Cô thầy đâu rồi? Nghe trong tim con"
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
       melody: [
-        { midi: 70, offsetBeats: 0, beats: 0.55, velocity: 0.78 }, // Bb4
-        { midi: 69, offsetBeats: 0.5, beats: 0.55, velocity: 0.76 }, // A4
-        { midi: 67, offsetBeats: 1.0, beats: 1.0, velocity: 0.74 }, // G4
+        { midi: 77, offsetBeats: 0, beats: 0.5, velocity: 0.84 }, // F5
+        { midi: 79, offsetBeats: 0.5, beats: 0.5, velocity: 0.86 }, // G5
+        { midi: 81, offsetBeats: 1.0, beats: 0.7, velocity: 0.88 }, // A5
+        { midi: 84, offsetBeats: 1.75, beats: 0.9, velocity: 0.9 }, // C6
+        { midi: 81, offsetBeats: 2.7, beats: 0.6, velocity: 0.84 }, // A5
+        { midi: 79, offsetBeats: 3.3, beats: 0.7, velocity: 0.82 }, // G5
       ],
-      arpeggio: arp2([43, 50, 55, 58]), // Gm
+      arpeggio: arp4(41, 48, 53, 57),
+      pad: [{ midi: 53, offsetBeats: 0, beats: 4.1, velocity: 0.32 }],
     },
+    // "vang tiếng cô thầy..."
     {
-      totalBeats: 2,
+      totalBeats: 4,
       flute: true,
       celesta: true,
-      melody: [{ midi: 65, offsetBeats: 0, beats: 2.3, velocity: 0.8 }], // F4
-      arpeggio: arp2([41, 48, 53, 57]), // F
-      pad: [{ midi: 41, offsetBeats: 0, beats: 2.4, velocity: 0.26 }],
-    },
-  ],
-};
-
-// ==================== 5. CANON IN D — Cổ điển (D Major, 4/4, Piano & Dây) ====================
-const CANON_IN_D_SCORE: ScoreArrangement = {
-  bpm: 64,
-  measures: [
-    { totalBeats: 2, melody: [], arpeggio: arp2([50, 57, 62, 66]), pad: [{ midi: 50, offsetBeats: 0, beats: 2.2, velocity: 0.22 }] },
-    { totalBeats: 2, melody: [], arpeggio: arp2([45, 52, 57, 61]), pad: [{ midi: 45, offsetBeats: 0, beats: 2.2, velocity: 0.22 }] },
-    { totalBeats: 2, melody: [{ midi: 78, offsetBeats: 0, beats: 2.1, velocity: 0.78 }], arpeggio: arp2([50, 57, 62, 66]), pad: [{ midi: 50, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    { totalBeats: 2, melody: [{ midi: 76, offsetBeats: 0, beats: 2.1, velocity: 0.72 }], arpeggio: arp2([45, 52, 57, 61]), pad: [{ midi: 45, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    { totalBeats: 2, melody: [{ midi: 74, offsetBeats: 0, beats: 2.1, velocity: 0.75 }], arpeggio: arp2([47, 54, 59, 62]), pad: [{ midi: 47, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    { totalBeats: 2, melody: [{ midi: 73, offsetBeats: 0, beats: 2.1, velocity: 0.7 }], arpeggio: arp2([42, 49, 54, 57]), pad: [{ midi: 42, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    { totalBeats: 2, melody: [{ midi: 71, offsetBeats: 0, beats: 2.1, velocity: 0.74 }], arpeggio: arp2([43, 50, 55, 59]), pad: [{ midi: 43, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    { totalBeats: 2, melody: [{ midi: 69, offsetBeats: 0, beats: 2.1, velocity: 0.68 }], arpeggio: arp2([38, 45, 50, 54]), pad: [{ midi: 38, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    { totalBeats: 2, melody: [{ midi: 71, offsetBeats: 0, beats: 2.1, velocity: 0.72 }], arpeggio: arp2([43, 50, 55, 59]), pad: [{ midi: 43, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    { totalBeats: 2, melody: [{ midi: 73, offsetBeats: 0, beats: 2.1, velocity: 0.74 }], arpeggio: arp2([45, 52, 57, 61]), pad: [{ midi: 45, offsetBeats: 0, beats: 2.2, velocity: 0.26 }] },
-    {
-      totalBeats: 2,
       melody: [
-        { midi: 74, offsetBeats: 0, beats: 0.65, velocity: 0.76 },
-        { midi: 78, offsetBeats: 0.5, beats: 0.65, velocity: 0.72 },
-        { midi: 81, offsetBeats: 1.0, beats: 0.65, velocity: 0.8 },
-        { midi: 79, offsetBeats: 1.5, beats: 0.65, velocity: 0.7 },
+        { midi: 77, offsetBeats: 0, beats: 0.5, velocity: 0.82 }, // F5
+        { midi: 76, offsetBeats: 0.5, beats: 0.5, velocity: 0.8 }, // E5
+        { midi: 74, offsetBeats: 1.0, beats: 0.5, velocity: 0.78 }, // D5
+        { midi: 72, offsetBeats: 1.5, beats: 0.5, velocity: 0.78 }, // C5
+        { midi: 69, offsetBeats: 2.0, beats: 2.1, velocity: 0.84 }, // A4
       ],
-      arpeggio: arp2([50, 57, 62, 66]),
-      pad: [{ midi: 50, offsetBeats: 0, beats: 2.2, velocity: 0.3 }],
-    },
-    {
-      totalBeats: 2,
-      melody: [
-        { midi: 78, offsetBeats: 0, beats: 0.65, velocity: 0.76 },
-        { midi: 74, offsetBeats: 0.5, beats: 0.65, velocity: 0.68 },
-        { midi: 76, offsetBeats: 1.0, beats: 1.2, velocity: 0.74 },
-      ],
-      arpeggio: arp2([45, 52, 57, 61]),
-      pad: [{ midi: 45, offsetBeats: 0, beats: 2.2, velocity: 0.3 }],
-    },
-    {
-      totalBeats: 2,
-      melody: [
-        { midi: 74, offsetBeats: 0, beats: 0.65, velocity: 0.75 },
-        { midi: 78, offsetBeats: 0.5, beats: 0.65, velocity: 0.72 },
-        { midi: 71, offsetBeats: 1.0, beats: 0.65, velocity: 0.68 },
-        { midi: 74, offsetBeats: 1.5, beats: 0.65, velocity: 0.72 },
-      ],
-      arpeggio: arp2([47, 54, 59, 62]),
-      pad: [{ midi: 47, offsetBeats: 0, beats: 2.2, velocity: 0.3 }],
-    },
-    {
-      totalBeats: 2,
-      melody: [
-        { midi: 73, offsetBeats: 0, beats: 0.65, velocity: 0.74 },
-        { midi: 69, offsetBeats: 0.5, beats: 0.65, velocity: 0.66 },
-        { midi: 73, offsetBeats: 1.0, beats: 1.2, velocity: 0.72 },
-      ],
-      arpeggio: arp2([42, 49, 54, 57]),
-      pad: [{ midi: 42, offsetBeats: 0, beats: 2.2, velocity: 0.3 }],
-    },
-    {
-      totalBeats: 2,
-      melody: [
-        { midi: 71, offsetBeats: 0, beats: 0.65, velocity: 0.76 },
-        { midi: 74, offsetBeats: 0.5, beats: 0.65, velocity: 0.72 },
-        { midi: 79, offsetBeats: 1.0, beats: 0.65, velocity: 0.8 },
-        { midi: 78, offsetBeats: 1.5, beats: 0.65, velocity: 0.72 },
-      ],
-      arpeggio: arp2([43, 50, 55, 59]),
-      pad: [{ midi: 43, offsetBeats: 0, beats: 2.2, velocity: 0.3 }],
-    },
-    {
-      totalBeats: 2,
-      melody: [
-        { midi: 78, offsetBeats: 0, beats: 0.65, velocity: 0.75 },
-        { midi: 74, offsetBeats: 0.5, beats: 0.65, velocity: 0.7 },
-        { midi: 69, offsetBeats: 1.0, beats: 1.2, velocity: 0.72 },
-      ],
-      arpeggio: arp2([38, 45, 50, 54]),
-      pad: [{ midi: 38, offsetBeats: 0, beats: 2.2, velocity: 0.3 }],
+      arpeggio: arp4(45, 52, 57, 60),
+      pad: [{ midi: 57, offsetBeats: 0, beats: 4.1, velocity: 0.34 }],
     },
   ],
 };
@@ -624,9 +885,11 @@ class TeacherMusicPlayer {
   private customAudio: HTMLAudioElement | null = null;
   private isPlaying = false;
   private measureIndex = 0;
+  private buffers = new Map<string, AudioBuffer>();
+  private loadingPromises = new Map<InstrumentKind, Promise<void>>();
 
   private createHallReverbBuffer(ctx: AudioContext): AudioBuffer {
-    const duration = 2.4;
+    const duration = 2.5;
     const length = Math.floor(ctx.sampleRate * duration);
     const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
 
@@ -635,9 +898,9 @@ class TeacherMusicPlayer {
       let prev = 0;
       for (let i = 0; i < length; i++) {
         const t = i / length;
-        const decay = Math.pow(1 - t, 2.7);
+        const decay = Math.pow(1 - t, 2.5);
         const raw = (Math.random() * 2 - 1) * decay;
-        prev = prev * 0.72 + raw * 0.28;
+        prev = prev * 0.7 + raw * 0.3;
         data[i] = prev;
       }
     }
@@ -652,20 +915,20 @@ class TeacherMusicPlayer {
       const ctx = new AudioCtx();
 
       const compressor = ctx.createDynamicsCompressor();
-      compressor.threshold.setValueAtTime(-14, ctx.currentTime);
+      compressor.threshold.setValueAtTime(-16, ctx.currentTime);
       compressor.knee.setValueAtTime(14, ctx.currentTime);
-      compressor.ratio.setValueAtTime(3.5, ctx.currentTime);
+      compressor.ratio.setValueAtTime(3.2, ctx.currentTime);
       compressor.attack.setValueAtTime(0.01, ctx.currentTime);
       compressor.release.setValueAtTime(0.25, ctx.currentTime);
 
       const master = ctx.createGain();
-      master.gain.value = 0.48;
+      master.gain.value = 0.85;
 
       const dry = ctx.createGain();
-      dry.gain.value = 0.76;
+      dry.gain.value = 0.82;
 
       const wet = ctx.createGain();
-      wet.gain.value = 0.36;
+      wet.gain.value = 0.34;
 
       const convolver = ctx.createConvolver();
       convolver.buffer = this.createHallReverbBuffer(ctx);
@@ -687,183 +950,99 @@ class TeacherMusicPlayer {
     return this.ctx;
   }
 
-  private playPianoNote(midi: number, when: number, durationSec: number, velocity = 0.7): void {
+  private async loadSampleUrl(url: string): Promise<ArrayBuffer | null> {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const contentType = (res.headers.get('content-type') || '').toLowerCase();
+      if (contentType.includes('text/html')) return null;
+      return await res.arrayBuffer();
+    } catch {
+      return null;
+    }
+  }
+
+  private async ensureInstrumentSamples(kind: InstrumentKind): Promise<void> {
+    const existing = this.loadingPromises.get(kind);
+    if (existing) return existing;
+
+    const ctx = this.ensureContext();
+    const bank = SAMPLE_BANK[kind];
+
+    const promise = Promise.all(
+      bank.notes.map(async (entry) => {
+        const key = `${kind}:${entry.midi}`;
+        if (this.buffers.has(key)) return;
+        let data = await this.loadSampleUrl(`${bank.folder}/${entry.name}.mp3`);
+        if (!data) {
+          data = await this.loadSampleUrl(`${bank.cdn}/${entry.name}.mp3`);
+        }
+        if (!data) return;
+        try {
+          const decoded = await ctx.decodeAudioData(data);
+          this.buffers.set(key, decoded);
+        } catch {
+          // Ignore individual decode errors
+        }
+      })
+    ).then(() => undefined);
+
+    this.loadingPromises.set(kind, promise);
+    return promise;
+  }
+
+  private playSampledNote(
+    kind: InstrumentKind,
+    midi: number,
+    when: number,
+    durationSec: number,
+    gainLevel: number
+  ): void {
     const ctx = this.ctx;
     const dry = this.dryGain;
     const wet = this.wetGain;
     if (!ctx || !dry || !wet) return;
 
-    const freq = midiToFreq(midi);
-    const totalDur = Math.max(0.45, durationSec * 1.45);
+    const bank = SAMPLE_BANK[kind];
+    let bestNote = bank.notes[0];
+    let minDiff = Infinity;
+    for (const candidate of bank.notes) {
+      const diff = Math.abs(midi - candidate.midi);
+      if (diff < minDiff) {
+        minDiff = diff;
+        bestNote = candidate;
+      }
+    }
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.Q.value = 0.7;
-    const brightFreq = Math.min(5400, Math.max(1200, freq * 5.6));
-    const warmFreq = Math.max(620, freq * 1.85);
-    filter.frequency.setValueAtTime(brightFreq, when);
-    filter.frequency.exponentialRampToValueAtTime(warmFreq, when + Math.min(0.95, totalDur * 0.65));
+    const buffer = this.buffers.get(`${kind}:${bestNote.midi}`);
+    if (!buffer) return;
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.setValueAtTime(Math.pow(2, (midi - bestNote.midi) / 12), when);
 
     const env = ctx.createGain();
-    const peak = Math.min(0.42, velocity * 0.32);
+    const attack =
+      kind === 'strings' ? 0.28 : kind === 'flute' ? 0.055 : 0.005;
+    const release =
+      kind === 'piano' ? 0.55 : kind === 'celesta' ? 0.65 : kind === 'strings' ? 0.45 : 0.25;
+    const sustainEnd = when + Math.max(0.18, durationSec);
+    const totalEnd = sustainEnd + release;
+
     env.gain.setValueAtTime(0.0001, when);
-    env.gain.linearRampToValueAtTime(peak, when + 0.012);
-    env.gain.exponentialRampToValueAtTime(peak * 0.42, when + Math.min(0.35, totalDur * 0.3));
-    env.gain.exponentialRampToValueAtTime(0.0001, when + totalDur);
+    env.gain.linearRampToValueAtTime(gainLevel, when + attack);
+    env.gain.setValueAtTime(gainLevel * 0.92, sustainEnd);
+    env.gain.exponentialRampToValueAtTime(0.0001, totalEnd);
 
-    const osc1 = ctx.createOscillator();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(freq, when);
-    const g1 = ctx.createGain();
-    g1.gain.value = 0.76;
-
-    const osc2 = ctx.createOscillator();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(freq * 2, when);
-    const g2 = ctx.createGain();
-    g2.gain.setValueAtTime(0.2, when);
-    g2.gain.exponentialRampToValueAtTime(0.04, when + totalDur * 0.55);
-
-    const osc3 = ctx.createOscillator();
-    osc3.type = 'triangle';
-    osc3.frequency.setValueAtTime(freq * 3, when);
-    const g3 = ctx.createGain();
-    g3.gain.setValueAtTime(0.06, when);
-    g3.gain.exponentialRampToValueAtTime(0.001, when + 0.22);
-
-    osc1.connect(g1);
-    osc2.connect(g2);
-    osc3.connect(g3);
-    g1.connect(filter);
-    g2.connect(filter);
-    g3.connect(filter);
-
-    filter.connect(env);
+    source.connect(env);
     env.connect(dry);
     env.connect(wet);
 
-    osc1.start(when);
-    osc2.start(when);
-    osc3.start(when);
-    osc1.stop(when + totalDur + 0.05);
-    osc2.stop(when + totalDur + 0.05);
-    osc3.stop(when + totalDur + 0.05);
+    source.start(when);
+    source.stop(totalEnd + 0.05);
   }
 
-  // Expressive warm Bamboo Flute / Violin lead with delayed vibrato LFO
-  private playFluteLead(midi: number, when: number, durationSec: number, velocity = 0.6): void {
-    const ctx = this.ctx;
-    const dry = this.dryGain;
-    const wet = this.wetGain;
-    if (!ctx || !dry || !wet) return;
-
-    const freq = midiToFreq(midi + 12);
-    const totalDur = Math.max(0.32, durationSec * 1.08);
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(2100, when);
-
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, when);
-
-    const lfo = ctx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.setValueAtTime(5.2, when);
-
-    const lfoDepth = ctx.createGain();
-    lfoDepth.gain.setValueAtTime(0, when);
-    lfoDepth.gain.linearRampToValueAtTime(freq * 0.0035, when + Math.min(0.28, totalDur * 0.45));
-
-    lfo.connect(lfoDepth);
-    lfoDepth.connect(osc.frequency);
-
-    const env = ctx.createGain();
-    const peak = Math.min(0.16, velocity * 0.14);
-    env.gain.setValueAtTime(0.0001, when);
-    env.gain.linearRampToValueAtTime(peak, when + 0.075);
-    env.gain.exponentialRampToValueAtTime(peak * 0.72, when + totalDur * 0.75);
-    env.gain.exponentialRampToValueAtTime(0.0001, when + totalDur);
-
-    osc.connect(filter);
-    filter.connect(env);
-    env.connect(dry);
-    env.connect(wet);
-
-    osc.start(when);
-    lfo.start(when);
-    osc.stop(when + totalDur + 0.04);
-    lfo.stop(when + totalDur + 0.04);
-  }
-
-  private playStringPad(midi: number, when: number, durationSec: number, velocity = 0.24): void {
-    const ctx = this.ctx;
-    const dry = this.dryGain;
-    const wet = this.wetGain;
-    if (!ctx || !dry || !wet) return;
-
-    const freq = midiToFreq(midi);
-    const totalDur = Math.max(0.8, durationSec * 1.25);
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(720, when);
-
-    const env = ctx.createGain();
-    const peak = Math.min(0.22, velocity * 0.45);
-    env.gain.setValueAtTime(0.0001, when);
-    env.gain.linearRampToValueAtTime(peak, when + Math.min(0.42, totalDur * 0.35));
-    env.gain.exponentialRampToValueAtTime(0.0001, when + totalDur);
-
-    const oscA = ctx.createOscillator();
-    oscA.type = 'triangle';
-    oscA.frequency.setValueAtTime(freq, when);
-    oscA.detune.setValueAtTime(-4.5, when);
-
-    const oscB = ctx.createOscillator();
-    oscB.type = 'sine';
-    oscB.frequency.setValueAtTime(freq, when);
-    oscB.detune.setValueAtTime(4.5, when);
-
-    oscA.connect(filter);
-    oscB.connect(filter);
-    filter.connect(env);
-    env.connect(dry);
-    env.connect(wet);
-
-    oscA.start(when);
-    oscB.start(when);
-    oscA.stop(when + totalDur + 0.05);
-    oscB.stop(when + totalDur + 0.05);
-  }
-
-  private playCelestaChime(midi: number, when: number, durationSec: number, velocity = 0.35): void {
-    const ctx = this.ctx;
-    const dry = this.dryGain;
-    const wet = this.wetGain;
-    if (!ctx || !dry || !wet) return;
-
-    const freq = midiToFreq(midi + 12);
-    const totalDur = Math.max(0.7, durationSec * 1.4);
-
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, when);
-
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0.0001, when);
-    env.gain.linearRampToValueAtTime(velocity * 0.14, when + 0.008);
-    env.gain.exponentialRampToValueAtTime(0.0001, when + totalDur);
-
-    osc.connect(env);
-    env.connect(dry);
-    env.connect(wet);
-    osc.start(when);
-    osc.stop(when + totalDur + 0.05);
-  }
-
-  private scheduleScoreLoop(theme: Exclude<MusicTheme, 'custom' | 'none'>): void {
+  private scheduleScoreLoop(theme: Exclude<MusicTheme, 'custom' | 'none' | 'canon-in-d'>): void {
     const score =
       theme === 'nguoi-thay'
         ? NGUOI_THAY_SCORE
@@ -871,9 +1050,7 @@ class TeacherMusicPlayer {
           ? MONG_UOC_SCORE
           : theme === 'nho-on-thay-co'
             ? NHO_ON_THAY_CO_SCORE
-            : theme === 'canon-in-d'
-              ? CANON_IN_D_SCORE
-              : BUI_PHAN_SCORE;
+            : BUI_PHAN_SCORE;
 
     const secPerBeat = 60 / score.bpm;
 
@@ -881,40 +1058,64 @@ class TeacherMusicPlayer {
       if (!this.isPlaying || !this.ctx) return;
 
       const measure = score.measures[this.measureIndex % score.measures.length];
-      const baseTime = this.ctx.currentTime + 0.05;
+      const baseTime = this.ctx.currentTime + 0.06;
 
       for (const note of measure.melody) {
         const when = baseTime + note.offsetBeats * secPerBeat;
         const dur = note.beats * secPerBeat;
-        this.playPianoNote(note.midi, when, dur, note.velocity ?? 0.74);
+        const vel = note.velocity ?? 0.78;
+        this.playSampledNote('piano', note.midi, when, dur * 1.15, vel * 0.65);
         if (measure.flute) {
-          this.playFluteLead(note.midi, when, dur, note.velocity ?? 0.65);
+          this.playSampledNote('flute', note.midi, when, dur * 0.95, vel * 0.34);
         }
         if (measure.celesta) {
-          this.playCelestaChime(note.midi, when, dur, note.velocity ?? 0.4);
+          this.playSampledNote('celesta', note.midi, when, dur * 1.2, vel * 0.28);
         }
       }
 
       for (const note of measure.arpeggio) {
         const when = baseTime + note.offsetBeats * secPerBeat;
         const dur = note.beats * secPerBeat;
-        this.playPianoNote(note.midi, when, dur, note.velocity ?? 0.34);
+        const vel = note.velocity ?? 0.36;
+        this.playSampledNote('piano', note.midi, when, dur, vel * 0.56);
       }
 
       if (measure.pad) {
         for (const padNote of measure.pad) {
           const when = baseTime + padNote.offsetBeats * secPerBeat;
           const dur = padNote.beats * secPerBeat;
-          this.playStringPad(padNote.midi, when, dur, padNote.velocity ?? 0.24);
+          const vel = padNote.velocity ?? 0.28;
+          this.playSampledNote('strings', padNote.midi, when, dur, vel * 0.42);
         }
       }
 
       this.measureIndex = (this.measureIndex + 1) % score.measures.length;
       const measureMs = measure.totalBeats * secPerBeat * 1000;
-      this.timerId = window.setTimeout(scheduleNextMeasure, Math.max(180, measureMs - 30));
+      this.timerId = window.setTimeout(scheduleNextMeasure, Math.max(180, measureMs - 40));
     };
 
     scheduleNextMeasure();
+  }
+
+  private playRealAudioFile(src: string, fallbackSrc?: string): void {
+    const audio = new Audio(src);
+    audio.loop = true;
+    audio.volume = 0.62;
+    this.customAudio = audio;
+
+    let fellBack = false;
+    const triggerFallback = () => {
+      if (fellBack || !this.isPlaying || !fallbackSrc) return;
+      fellBack = true;
+      const fb = new Audio(fallbackSrc);
+      fb.loop = true;
+      fb.volume = 0.62;
+      this.customAudio = fb;
+      void fb.play().catch(() => undefined);
+    };
+
+    audio.addEventListener('error', triggerFallback, { once: true });
+    void audio.play().catch(triggerFallback);
   }
 
   public start(theme: MusicTheme, customAudioUrl?: string): void {
@@ -925,32 +1126,36 @@ class TeacherMusicPlayer {
     this.measureIndex = 0;
 
     if (theme === 'custom' && customAudioUrl?.trim()) {
-      try {
-        const audio = new Audio(customAudioUrl.trim());
-        audio.loop = true;
-        audio.volume = 0.55;
-        this.customAudio = audio;
-        void audio.play().catch(() => {
-          if (this.isPlaying) {
-            this.ensureContext();
-            this.scheduleScoreLoop('bui-phan');
-          }
-        });
-        return;
-      } catch {
-        // Fallback below
-      }
+      this.playRealAudioFile(customAudioUrl.trim());
+      return;
+    }
+
+    if (theme === 'canon-in-d') {
+      this.playRealAudioFile(
+        '/audio/canon-in-d.mp3',
+        'https://upload.wikimedia.org/wikipedia/commons/c/c6/Canon_in_D_Major_%28ISRC_USUAN1100301%29.mp3'
+      );
+      return;
     }
 
     this.ensureContext();
-    const safeTheme: Exclude<MusicTheme, 'custom' | 'none'> =
+    const safeTheme: Exclude<MusicTheme, 'custom' | 'none' | 'canon-in-d'> =
       theme === 'nguoi-thay' ||
       theme === 'mong-uoc-ky-niem-xua' ||
-      theme === 'nho-on-thay-co' ||
-      theme === 'canon-in-d'
+      theme === 'nho-on-thay-co'
         ? theme
         : 'bui-phan';
-    this.scheduleScoreLoop(safeTheme);
+
+    void Promise.all([
+      this.ensureInstrumentSamples('piano'),
+      this.ensureInstrumentSamples('strings'),
+      this.ensureInstrumentSamples('flute'),
+      this.ensureInstrumentSamples('celesta'),
+    ]).then(() => {
+      if (this.isPlaying) {
+        this.scheduleScoreLoop(safeTheme);
+      }
+    });
   }
 
   public stop(): void {

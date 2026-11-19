@@ -88,7 +88,7 @@ export const MUSIC_OPTIONS: Array<{
   },
   {
     id: 'nguoi-thay',
-    title: 'Người Thầy — Không lời (Dương cầm & Cello)',
+    title: 'Người Thầy — Không lời (Piano, Sáo & Dây)',
     subtitle: 'Ballad nhẹ nhàng, xúc động về bóng dáng người lái đò',
   },
   {
@@ -103,8 +103,8 @@ export const MUSIC_OPTIONS: Array<{
   },
   {
     id: 'canon-in-d',
-    title: 'Canon in D — Không lời Cổ điển (Piano & Dây)',
-    subtitle: 'Hòa tấu cổ điển trang trọng với âm vang phòng hòa nhạc',
+    title: 'Canon in D — Bản thu dàn nhạc thật (MP3)',
+    subtitle: 'Bản thu âm dàn nhạc cổ điển trang trọng với âm vang phòng hòa nhạc',
   },
   {
     id: 'custom',

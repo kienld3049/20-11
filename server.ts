@@ -1,19 +1,41 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT || 3000);
-const IS_PROD = process.env.NODE_ENV === 'production';
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '20-11-2016';
+const DIST_DIR = path.resolve(__dirname, 'dist');
+const IS_TSX = process.execArgv.some((arg) => arg.includes('tsx'));
+const IS_PROD =
+  process.env.NODE_ENV === 'production' ||
+  (!IS_TSX && fs.existsSync(path.join(DIST_DIR, 'index.html')));
+const ADMIN_PASSCODE = (process.env.ADMIN_PASSCODE || '').trim() || '20-11-2026';
 
-const DATA_DIR = path.resolve(__dirname, '.data');
+function resolveDataDir(): string {
+  const preferred = path.resolve(__dirname, '.data');
+  try {
+    if (!fs.existsSync(preferred)) {
+      fs.mkdirSync(preferred, { recursive: true });
+    }
+    fs.accessSync(preferred, fs.constants.W_OK);
+    return preferred;
+  } catch {
+    const fallback = path.join(os.tmpdir(), 'trian-2011-data');
+    if (!fs.existsSync(fallback)) {
+      fs.mkdirSync(fallback, { recursive: true });
+    }
+    return fallback;
+  }
+}
+
+const DATA_DIR = resolveDataDir();
 const CARDS_FILE = path.join(DATA_DIR, 'cards.json');
 const SECRET_FILE = path.join(DATA_DIR, '.session-secret');
 
@@ -426,6 +448,15 @@ async function createServer() {
     }
   });
 
+  const publicAudioDir = path.resolve(__dirname, 'public', 'audio');
+  const publicSamplesDir = path.resolve(__dirname, 'public', 'samples');
+  if (fs.existsSync(publicAudioDir)) {
+    app.use('/audio', express.static(publicAudioDir, { maxAge: '7d' }));
+  }
+  if (fs.existsSync(publicSamplesDir)) {
+    app.use('/samples', express.static(publicSamplesDir, { maxAge: '7d' }));
+  }
+
   if (!IS_PROD) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
@@ -434,14 +465,13 @@ async function createServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distDir = path.resolve(__dirname, 'dist');
-    app.use(express.static(distDir));
+    app.use(express.static(DIST_DIR));
     app.get('*', (req: Request, res: Response) => {
       if (req.path.startsWith('/api/')) {
         res.status(404).json({ error: 'API endpoint not found' });
         return;
       }
-      res.sendFile(path.join(distDir, 'index.html'));
+      res.sendFile(path.join(DIST_DIR, 'index.html'));
     });
   }
 

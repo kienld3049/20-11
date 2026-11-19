@@ -171,19 +171,29 @@ function AppContent() {
     setViewMode('landing');
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (): Promise<boolean> => {
     setAuthError(null);
     setIsSigningIn(true);
     try {
       await signInWithPopup(auth, googleProvider);
       setViewMode('studio');
+      return true;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('popup-closed-by-user')) {
         setAuthError('Bạn đã đóng cửa sổ đăng nhập Google trước khi hoàn tất.');
+      } else if (msg.includes('unauthorized-domain')) {
+        setAuthError(
+          'Tên miền hiện tại chưa được cấp quyền Google Sign-In trong Firebase. Bạn hãy đăng nhập bằng Mật khẩu Admin ở trên.'
+        );
+      } else if (msg.includes('popup-blocked')) {
+        setAuthError(
+          'Trình duyệt đã chặn cửa sổ đăng nhập Google. Vui lòng cho phép pop-up hoặc dùng Mật khẩu Admin.'
+        );
       } else {
-        setAuthError('Không thể đăng nhập Google. Vui lòng thử lại.');
+        setAuthError('Không thể đăng nhập Google. Vui lòng thử lại hoặc dùng Mật khẩu Admin.');
       }
+      return false;
     } finally {
       setIsSigningIn(false);
     }
@@ -204,7 +214,13 @@ function AppContent() {
         error?: string;
       };
       if (!res.ok || !data.token) {
-        setAuthError(data.error || 'Mật khẩu Admin chưa chính xác.');
+        if (res.status === 404 || res.status === 405) {
+          setAuthError(
+            'Không tìm thấy API đăng nhập (/api/admin/login). Nếu tự host bản build, hãy chạy bằng npm start (node server.ts) thay vì host tĩnh.'
+          );
+        } else {
+          setAuthError(data.error || 'Mật khẩu Admin chưa chính xác.');
+        }
         return false;
       }
 
@@ -285,7 +301,7 @@ function AppContent() {
   }
 
   // 3. Authenticated Admin Studio (Passcode or Google)
-  if (viewMode === 'studio' && (passcodeSession || firebaseUser)) {
+  if (passcodeSession || firebaseUser) {
     return (
       <AdminStudio
         firebaseUser={firebaseUser}
@@ -296,15 +312,15 @@ function AppContent() {
           setViewMode('landing');
         }}
         onSignOut={() => void handleSignOut()}
-        onNavigateHome={() => setViewMode('landing')}
+        onNavigateHome={() => setViewMode('studio')}
       />
     );
   }
 
-  // 4. Landing Showcase
+  // 4. Direct Passcode Authentication Gate
   return (
     <LandingShowcase
-      isAuthenticated={Boolean(passcodeSession || firebaseUser)}
+      isAuthenticated={Boolean(viewMode === 'studio' && (passcodeSession || firebaseUser))}
       isSigningIn={isSigningIn}
       authError={authError}
       onGoogleSignIn={handleGoogleSignIn}
