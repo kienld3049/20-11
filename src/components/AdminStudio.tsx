@@ -1357,7 +1357,7 @@ export const AdminStudio: React.FC<AdminStudioProps> = ({
                       </p>
                       <div className="mt-4 pt-3 border-t border-[#F59E0B]/25 text-right">
                         <p className="font-display italic font-semibold text-[15px] tracking-[0.04em] text-[#B45309] mb-0.5">
-                          Kính tặng,
+                          Kính chúc,
                         </p>
                         <p className="font-serif font-semibold text-base text-[#0F4C5C]">
                           {previewCard.senderName}
