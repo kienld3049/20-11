@@ -542,7 +542,7 @@ export const CardViewer: React.FC<CardViewerProps> = ({
               >
                 <div className="text-right">
                   <p className="font-display italic font-semibold text-[16px] sm:text-[18px] tracking-[0.04em] text-[#B45309] leading-snug mb-1">
-                    Kính tặng,
+                    Kính chúc,
                   </p>
                   <p className="font-display italic font-semibold text-base sm:text-lg text-[#0F4C5C]">
                     {effectiveCard.senderName}
